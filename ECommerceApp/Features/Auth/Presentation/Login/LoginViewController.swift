@@ -1,0 +1,128 @@
+//
+//  LoginViewController.swift
+//  ECommerceApp
+//
+//  Created by Ademola Fadumo on 20/06/2025.
+//
+
+import UIKit
+
+class LoginViewController: UIViewController {
+    private var scrollView: UIScrollView!
+    private var contentView: UIView!
+    private var emailTextField: DefaultTextField!
+    private var passwordTextField: DefaultTextField!
+    private var loginButton: DefaultButton!
+    
+    weak var coordinator: AuthCoordinator?
+    let viewModel: LoginViewModel
+    
+    init(viewModel: LoginViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        initializeViewAppearance()
+        setupScrollView()
+        setupEmailTextField()
+        setupPasswordTextField()
+        setupLoginButton()
+    }
+    
+    private func initializeViewAppearance() {
+        title = "Login"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        view.backgroundColor = .systemBackground
+    }
+    
+    private func setupScrollView() {
+        scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
+        NSLayoutConstraint.activate([
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
+    }
+    
+    private func setupEmailTextField() {
+        emailTextField = DefaultTextField(
+            textFieldComponent: .init(
+                title: "Email",
+                hint: "Enter your email",
+                maintainsValidationMessages: false,
+                validations: [
+                    FormValidators.email
+                ]
+            ))
+        emailTextField.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(emailTextField)
+        
+        NSLayoutConstraint.activate([
+            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            emailTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+        ])
+        
+    }
+    
+    private func setupPasswordTextField() {
+        passwordTextField = DefaultTextField(
+            textFieldComponent: .init(
+                title: "Password",
+                hint: "Enter your password",
+                obscured: true,
+                showsIconValidationMessage: true,
+                validations: [
+                    FormValidators.atLeast8Characters,
+                    FormValidators.uppercaseAndLowercase,
+                    FormValidators.numberAndSymbol,
+                ]
+            ))
+        passwordTextField.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(passwordTextField)
+        
+        NSLayoutConstraint.activate([
+            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
+        ])
+    }
+    
+    private func setupLoginButton() {
+        loginButton = DefaultButton()
+        loginButton.button.setTitle("Login", for: .normal)
+        loginButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(loginButton)
+        
+        NSLayoutConstraint.activate([
+            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            loginButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 48),
+            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+        ])
+    }
+}
