@@ -6,14 +6,9 @@
 //
 
 import Foundation
+import DefaultTextField
 
 struct FormValidators {
-    
-    struct FormValidator {
-        let message: String
-        let validate: (String?) -> Bool
-    }
-    
     static let email = FormValidator(
         message: "Email is not valid",
         validate: { input in
@@ -23,7 +18,27 @@ struct FormValidators {
             return predicate.evaluate(with: input)
         }
     )
-
+    
+    static func notEmpty(label: String) -> FormValidator {
+        return FormValidator(
+            message: "\(label) cannot be empty",
+            validate: { input in
+                guard let input else { return false }
+                return !input.isEmpty
+            }
+        )
+    }
+    
+    static func confirmPassword(password: @autoclosure @escaping () -> String) -> FormValidator {
+        return FormValidator(
+            message: "Password is not the same",
+            validate: { input in
+                guard let input else { return false }
+                return input == password()
+            }
+        )
+    }
+    
     static let atLeast8Characters = FormValidator(
         message: "Must be at least 8 characters long",
         validate: { input in
@@ -43,7 +58,7 @@ struct FormValidators {
             return predicate.evaluate(with: input)
         }
     )
-
+    
     static let numberAndSymbol = FormValidator(
         message: "Must contain a number and a special symbol",
         validate: { input in

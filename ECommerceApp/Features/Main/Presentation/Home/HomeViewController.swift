@@ -17,5 +17,8 @@ class HomeViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = .systemBackground
     }
+    
+    @objc private func logoutButtonTapped() {
+        coordinator?.navigateToLogin()
+    }
 }
-

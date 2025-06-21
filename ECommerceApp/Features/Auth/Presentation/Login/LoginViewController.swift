@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import DefaultTextField
+import RxSwift
+import RxCocoa
 
 class LoginViewController: UIViewController {
     private var scrollView: UIScrollView!
@@ -13,9 +16,11 @@ class LoginViewController: UIViewController {
     private var emailTextField: DefaultTextField!
     private var passwordTextField: DefaultTextField!
     private var loginButton: DefaultButton!
+    private var signupButton: UILabel!
     
     weak var coordinator: AuthCoordinator?
     let viewModel: LoginViewModel
+    let bag = DisposeBag()
     
     init(viewModel: LoginViewModel) {
         self.viewModel = viewModel
@@ -33,6 +38,7 @@ class LoginViewController: UIViewController {
         setupEmailTextField()
         setupPasswordTextField()
         setupLoginButton()
+        setupSignupButton()
     }
     
     private func initializeViewAppearance() {
@@ -70,7 +76,7 @@ class LoginViewController: UIViewController {
             textFieldComponent: .init(
                 title: "Email",
                 hint: "Enter your email",
-                maintainsValidationMessages: false,
+                keyboardType: .emailAddress,
                 validations: [
                     FormValidators.email
                 ]
@@ -85,6 +91,12 @@ class LoginViewController: UIViewController {
             emailTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
         ])
         
+        emailTextField.formValidState
+            .subscribe(onNext: { [weak self] isValid in
+                guard let self else { return }
+                debugPrint("emailTextField - isValid: \(isValid)")
+            })
+            .disposed(by: bag)
     }
     
     private func setupPasswordTextField() {
@@ -93,11 +105,9 @@ class LoginViewController: UIViewController {
                 title: "Password",
                 hint: "Enter your password",
                 obscured: true,
-                showsIconValidationMessage: true,
+                validateWhenEmpty: true,
                 validations: [
-                    FormValidators.atLeast8Characters,
-                    FormValidators.uppercaseAndLowercase,
-                    FormValidators.numberAndSymbol,
+                    FormValidators.notEmpty(label: "Password")
                 ]
             ))
         passwordTextField.translatesAutoresizingMaskIntoConstraints = false
@@ -109,6 +119,13 @@ class LoginViewController: UIViewController {
             passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
         ])
+        
+        passwordTextField.formValidState
+            .subscribe(onNext: { [weak self] isValid in
+                guard let self else { return }
+                debugPrint("passwordTextField - isValid: \(isValid)")
+            })
+            .disposed(by: bag)
     }
     
     private func setupLoginButton() {
@@ -122,7 +139,34 @@ class LoginViewController: UIViewController {
             loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             loginButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 48),
-            loginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
+    }
+    
+    private func setupSignupButton() {
+        signupButton = UILabel()
+        signupButton.isUserInteractionEnabled = true
+        signupButton.textAlignment = .center
+        signupButton.attributedText = NSAttributedString(
+            string: "Don't have an account? Signup",
+            attributes: [
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+            ]
+        )
+        signupButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(signupButtonTapped)))
+        signupButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(signupButton)
+        
+        NSLayoutConstraint.activate([
+            signupButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            signupButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            signupButton.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 36),
+            signupButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+        ])
+    }
+    
+    @objc private func signupButtonTapped() {
+        debugPrint("signupButtonTapped")
+        coordinator?.navigateToSignup()
     }
 }

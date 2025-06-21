@@ -15,6 +15,7 @@
 		7E792B3E2E00D842008BB2FA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B3D2E00D842008BB2FA /* FirebaseAuth */; };
 		7E792B402E00D842008BB2FA /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B3F2E00D842008BB2FA /* FirebaseCore */; };
 		7E792B422E00D842008BB2FA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B412E00D842008BB2FA /* FirebaseFirestore */; };
+		7EE6912A2E06BE83005B6F26 /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4F01FB2E06AFF5006B1074 /* DefaultTextField */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EE6912A2E06BE83005B6F26 /* DefaultTextField in Frameworks */,
 				7E4FF6512E05C24D006B1074 /* RxRelay in Frameworks */,
 				7E792B402E00D842008BB2FA /* FirebaseCore in Frameworks */,
 				7E4FF64F2E05C24D006B1074 /* RxCocoa in Frameworks */,
@@ -158,6 +160,8 @@
 				7E4FF64E2E05C24D006B1074 /* RxCocoa */,
 				7E4FF6502E05C24D006B1074 /* RxRelay */,
 				7E4FF6522E05C24D006B1074 /* RxSwift */,
+				7E4F01FB2E06AFF5006B1074 /* DefaultTextField */,
+				7E4F01FE2E06B2F9006B1074 /* DefaultTextField */,
 			);
 			productName = ECommerceApp;
 			productReference = 7E792B032E00D36D008BB2FA /* ECommerceApp.app */;
@@ -246,6 +250,7 @@
 			packageReferences = (
 				7E792B3C2E00D842008BB2FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				7EE6917D2E06BEA8005B6F26 /* XCLocalSwiftPackageReference "../DefaultTextField" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7E792B042E00D36D008BB2FA /* Products */;
@@ -625,6 +630,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		7EE6917D2E06BEA8005B6F26 /* XCLocalSwiftPackageReference "../DefaultTextField" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../DefaultTextField;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -645,6 +657,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7E4F01FB2E06AFF5006B1074 /* DefaultTextField */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = DefaultTextField;
+		};
+		7E4F01FE2E06B2F9006B1074 /* DefaultTextField */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DefaultTextField;
+		};
 		7E4FF64E2E05C24D006B1074 /* RxCocoa */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */;

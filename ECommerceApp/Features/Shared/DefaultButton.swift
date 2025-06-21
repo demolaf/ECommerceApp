@@ -22,6 +22,7 @@ class DefaultButton: UIView {
     private func setupButton() {
         button = UIButton()
         button.setTitleColor(.systemBackground, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         button.layer.cornerRadius = 16
         button.backgroundColor = .label
         button.translatesAutoresizingMaskIntoConstraints = false
