@@ -18,20 +18,26 @@ class ProductRepositoryImpl: ProductRepository {
     let remoteDatasource: ProductRemoteDatasource
     
     func getProducts() -> Observable<Result<[Product], Error>> {
-        remoteDatasource.getProducts().map { [weak self] result in
-            guard let self else { return result.map { _ in [] } }
-            
-            return result.map { products in
-                products.map { data in
-                    var product = data.toEntity
-                    let cartResult = self.checkIfProductInCart(product.id)
-                    if case .success = cartResult {
-                        product.inCart = true
+        Observable.combineLatest(remoteDatasource.getProducts(), localDatasource.getCart())
+            .map { productsResult, cartResult in
+                DefaultLogger.log(self, "Got here: \(cartResult)")
+
+                switch (productsResult, cartResult) {
+                case let (.success(products), .success(cart)):
+                    let updatedProducts = products.map { product -> Product in
+                        var updated = product.toEntity
+                        updated.inCart = cart.products.contains(where: { $0.uid == product.uid })
+                        return updated
                     }
-                    return product
+                    return .success(updatedProducts)
+
+                case let (.failure(error), _):
+                    return .failure(error)
+
+                case let (_, .failure(error)):
+                    return .failure(error)
                 }
             }
-        }
     }
     
     func storeProduct(product: Product) async -> Result<Void, Error> {
@@ -51,7 +57,7 @@ class ProductRepositoryImpl: ProductRepository {
                 status: "",
                 userId: userId,
                 products: cart.products.map(ProductDTO.fromEntity),
-                createdAt: .init()
+                createdAt: .now
             ))
     }
     
@@ -59,8 +65,8 @@ class ProductRepositoryImpl: ProductRepository {
         localDatasource.checkIfProductInCart(productId.uuidString).map(\.toEntity)
     }
     
-    func getCart() -> Result<Cart, Error> {
-        localDatasource.getCart().map(\.toEntity)
+    func getCart() -> Observable<Result<Cart, Error>> {
+        localDatasource.getCart().map { $0.map(\.toEntity) }
     }
     
     func addToCart(_ product: Product) -> Result<Void, Error> {

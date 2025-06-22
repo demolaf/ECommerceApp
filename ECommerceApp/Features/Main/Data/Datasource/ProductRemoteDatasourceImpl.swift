@@ -59,7 +59,7 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
         }
     }
     
-    func getOrders() -> RxSwift.Observable<Result<[OrderDTO], any Error>> {
+    func getOrders() -> Observable<Result<[OrderDTO], Error>> {
         Observable.create {[weak self] observer in
             guard let self else {
                 return Disposables.create()
@@ -84,7 +84,7 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
         }
     }
     
-    func placeOrder(order: OrderDTO) async -> Result<Void, any Error> {
+    func placeOrder(order: OrderDTO) async -> Result<Void, Error> {
         do {
             let data = try JSONEncoder().encode(order)
             

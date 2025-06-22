@@ -107,6 +107,22 @@ class OrdersViewController: UIViewController {
             }
         }
         
+//        viewModel.state
+//            .debug("initial snapshot setup")
+//            .asObservable()
+//            .single { $0.viewState == .ready }
+//            .subscribe(onNext: {[weak self] state in
+//                guard let self = self else { return }
+//
+//                debugPrint("Should be called only once")
+//                var dataSourceSnapshot = NSDiffableDataSourceSnapshot<Order, ListItem>()
+//                dataSourceSnapshot.appendSections(state.orders)
+//                self.diffableDataSource.apply(dataSourceSnapshot, animatingDifferences: true)
+//
+//                debugPrint("Sections in: \(self.diffableDataSource.numberOfSections(in: collectionView))")
+//            })
+//            .disposed(by: bag)
+        
         viewModel.state
             .distinctUntilChanged(\.orders)
             .drive(onNext: {[weak self] state in

@@ -81,13 +81,17 @@ class HomeViewModel {
     
     func fetchCart() {
         updateState(currentState.copyWith(.fetchCart, processingState: .processing))
-        let result = productRepository.getCart()
-        switch result {
-        case .success(let cart):
-            updateState(currentState.copyWith(.fetchCart, processingState: .success, cart: cart))
-        case .failure(let failure):
-            updateState(currentState.copyWith(.fetchCart, processingState: .failure, failureMessage: failure.localizedDescription))
-        }
+        productRepository.getCart()
+            .subscribe(onNext: { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let cart):
+                    updateState(currentState.copyWith(.fetchCart, processingState: .success, cart: cart))
+                case .failure(let failure):
+                    updateState(currentState.copyWith(.fetchCart, processingState: .failure, failureMessage: failure.localizedDescription))
+                }
+            })
+            .disposed(by: bag)
     }
     
     func fetchProducts() {

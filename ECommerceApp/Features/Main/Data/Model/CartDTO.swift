@@ -24,6 +24,6 @@ nonisolated struct CartDTO: Codable {
         let products: [ProductDTO] = (mo.products?.allObjects as? [ProductMO])?
             .map(ProductDTO.fromMO) ?? []
 
-        return CartDTO(cartId: mo.cartId ?? "", products: products, createdAt: mo.createdAt ?? .init())
+        return CartDTO(cartId: mo.cartId ?? "", products: products, createdAt: mo.createdAt ?? .now)
     }
 }

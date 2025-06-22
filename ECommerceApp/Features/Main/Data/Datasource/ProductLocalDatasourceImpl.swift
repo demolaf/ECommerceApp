@@ -7,32 +7,45 @@
 
 import Foundation
 import CoreData
+import RxSwift
 
 class ProductLocalDatasourceImpl: ProductLocalDatasource {
     init(moc: NSManagedObjectContext) {
         self.moc = moc
+        
+        let request = CartMO.fetchRequest()
+        request.sortDescriptors = []
+        getCartObserver = try? FetchedResultsControllerObserver(fetchRequest: request, context: moc)
     }
     
     private let moc: NSManagedObjectContext
+    private var getCartObserver: FetchedResultsControllerObserver<CartMO>?
     
     func checkIfProductInCart(_ productId: String) -> Result<ProductDTO, Error> {
         checkIfProductInCartDB(productId).map(ProductDTO.fromMO)
     }
     
-    func getCart() -> Result<CartDTO, Error> {
-        do {
-            guard let cart = try moc.fetch(CartMO.fetchRequest()).first else {
-                let cartMO = CartMO(context: moc)
-                cartMO.cartId = UUID().uuidString
-                cartMO.createdAt = .init()
-                return .success(CartDTO.fromMO(cartMO))
+    func getCart() -> Observable<Result<CartDTO, Error>> {
+        guard let getCartObserver else { return Observable.just(.failure(Failure.notFoundInDatabase)) }
+        
+        return getCartObserver.asObservable()
+            .map { cartList in
+                if let cart = cartList.first {
+                    return .success(CartDTO.fromMO(cart))
+                } else {
+                    // Create new CartMO and emit it
+                    let cartMO = CartMO(context: self.moc)
+                    cartMO.cartId = UUID().uuidString
+                    cartMO.createdAt = .init()
+                    
+                    do {
+                        try self.moc.save()
+                        return .success(CartDTO.fromMO(cartMO))
+                    } catch {
+                        return .failure(error)
+                    }
+                }
             }
-            
-            try moc.save()
-            return .success(CartDTO.fromMO(cart))
-        } catch {
-            return .failure(error)
-        }
     }
     
     func addToCart(_ product: ProductDTO) -> Result<Void, Error> {
@@ -73,7 +86,7 @@ class ProductLocalDatasourceImpl: ProductLocalDatasource {
             case .failure(let failure):
                 return .failure(failure)
             }
-
+            
             try moc.save()
             return .success(())
         } catch {

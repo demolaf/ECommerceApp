@@ -26,6 +26,6 @@ nonisolated struct OrderDTO: Codable {
         let products: [ProductDTO] = (mo.products?.allObjects as? [ProductMO])?
             .map(ProductDTO.fromMO) ?? []
 
-        return OrderDTO(uid: mo.uid ?? "", status: mo.status ?? "", userId: mo.userId ?? "", products: products, createdAt: mo.createdAt ?? .init())
+        return OrderDTO(uid: mo.uid ?? "", status: mo.status ?? "", userId: mo.userId ?? "", products: products, createdAt: mo.createdAt ?? .now)
     }
 }

@@ -77,6 +77,7 @@ class OrdersViewModel {
                 guard let self else { return }
                 switch result {
                 case .success(let orders):
+                    DefaultLogger.log(self, "Got here: \(orders)")
                     updateState(currentState.copyWith(.ready, orders: orders))
                 case .failure(let failure):
                     updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))

@@ -14,7 +14,7 @@ protocol ProductRepository {
     func getOrders() -> Observable<Result<[Order], Error>>
     func placeOrder(userId: String, cart: Cart) async -> Result<Void, Error>
     func checkIfProductInCart(_ productId: UUID) -> Result<Product, Error>
-    func getCart() -> Result<Cart, Error>
+    func getCart() -> Observable<Result<Cart, Error>>
     func addToCart(_ product: Product) -> Result<Void, Error>
     func removeFromCart(_ productId: UUID) -> Result<Void, Error>
 }

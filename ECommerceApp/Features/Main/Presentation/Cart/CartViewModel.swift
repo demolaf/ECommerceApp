@@ -91,13 +91,17 @@ class CartViewModel {
     
     func fetchCart() {
         updateState(currentState.copyWith(.loading))
-        let result = productRepository.getCart()
-        switch result {
-        case .success(let cart):
-            updateState(currentState.copyWith(.ready, cart: cart))
-        case .failure(let failure):
-            updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
-        }
+        productRepository.getCart()
+            .subscribe(onNext: { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let cart):
+                    updateState(currentState.copyWith(.ready, cart: cart))
+                case .failure(let failure):
+                    updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
+                }
+            })
+            .disposed(by: bag)
     }
     
     func placeOrder() async {

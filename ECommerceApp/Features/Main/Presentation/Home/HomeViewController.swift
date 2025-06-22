@@ -48,9 +48,22 @@ class HomeViewController: UIViewController {
         
         navigationItem.rightBarButtonItems = [
             UIBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right"), style: .plain, target: self, action: #selector(logoutButtonTapped)),
-            UIBarButtonItem(image: UIImage(systemName: "cart"), style: .plain, target: self, action: #selector(cartButtonTapped)),
             UIBarButtonItem(image: UIImage(systemName: "list.clipboard"), style: .plain, target: self, action: #selector(ordersButtonTapped))
         ]
+        
+        setupCartBarButtonItem()
+    }
+    
+    private func setupCartBarButtonItem() {
+        let cartBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "cart")!, target: self, action: #selector(cartButtonTapped))
+        navigationItem.rightBarButtonItems?.append(cartBarButtonItem)
+        
+        viewModel.state
+            .distinctUntilChanged(\.cart)
+            .drive(onNext: { state in
+                cartBarButtonItem.badgeValue = state.cart?.products.count ?? 0
+            })
+            .disposed(by: bag)
     }
     
     private func setupFAB() {
@@ -106,7 +119,7 @@ class HomeViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        diffableDataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) { [viewModel] collectionView, indexPath, product in
+        diffableDataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) { collectionView, indexPath, product in
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: ProductCollectionViewCell.reuseIdentifier,
                 for: indexPath
