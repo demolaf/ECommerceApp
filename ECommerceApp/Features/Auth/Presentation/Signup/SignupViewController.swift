@@ -41,6 +41,7 @@ class SignupViewController: UIViewController {
         setupConfirmPasswordTextField()
         setupSignupButton()
         setupLoginButton()
+        subscribeToViewModel()
     }
     
     private func initializeViewAppearance() {
@@ -93,11 +94,12 @@ class SignupViewController: UIViewController {
             emailTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
         ])
         
+        emailTextField.textEditingState
+            .bind(to: viewModel.emailTextPublisher)
+            .disposed(by: bag)
+        
         emailTextField.formValidState
-            .subscribe(onNext: { [weak self] isValid in
-                guard let self else { return }
-                debugPrint("emailTextField - isValid: \(isValid)")
-            })
+            .bind(to: viewModel.emailValidPublisher)
             .disposed(by: bag)
     }
     
@@ -125,11 +127,12 @@ class SignupViewController: UIViewController {
             passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 8),
         ])
         
+        passwordTextField.textEditingState
+            .bind(to: viewModel.passwordTextPublisher)
+            .disposed(by: bag)
+        
         passwordTextField.formValidState
-            .subscribe(onNext: { [weak self] isValid in
-                guard let self else { return }
-                debugPrint("passwordTextField - isValid: \(isValid)")
-            })
+            .bind(to: viewModel.passwordValidPublisher)
             .disposed(by: bag)
     }
     
@@ -160,17 +163,15 @@ class SignupViewController: UIViewController {
             .disposed(by: bag)
         
         confirmPasswordTextField.formValidState
-            .subscribe(onNext: { [weak self] isValid in
-                guard let self else { return }
-                debugPrint("confirmPasswordTextField - isValid: \(isValid)")
-            })
+            .bind(to: viewModel.confirmPasswordValidPublisher)
             .disposed(by: bag)
     }
     
     private func setupSignupButton() {
         signupButton = DefaultButton()
-        signupButton.isUserInteractionEnabled = true
-        signupButton.button.setTitle("Signup", for: .normal)
+        signupButton.isEnabled = false
+        signupButton.button.setTitle("Sign up", for: .normal)
+        signupButton.button.addTarget(self, action: #selector(signupButtonTapped), for: .primaryActionTriggered)
         signupButton.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(signupButton)
@@ -180,10 +181,19 @@ class SignupViewController: UIViewController {
             signupButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             signupButton.topAnchor.constraint(equalTo: confirmPasswordTextField.bottomAnchor, constant: 48),
         ])
+        
+        viewModel.state
+            .distinctUntilChanged(\.formValid)
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                signupButton.isEnabled = state.formValid
+            })
+            .disposed(by: bag)
     }
     
     private func setupLoginButton() {
         loginButton = UILabel()
+        loginButton.isUserInteractionEnabled = true
         loginButton.textAlignment = .center
         loginButton.attributedText = NSAttributedString(
             string: "Already have an account?",
@@ -204,7 +214,49 @@ class SignupViewController: UIViewController {
         ])
     }
     
+    private func subscribeToViewModel() {
+        viewModel.state
+            .do(onNext: { [weak self] state in
+                guard let self else { return }
+                if state.viewState == .register {
+                    if state.processingState == .success {
+                        coordinator?.navigateToHome()
+                    }
+                }
+            })
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                LoadingOverlay.hide()
+                
+                switch state.viewState {
+                case .loading:
+                    LoadingOverlay.show()
+                case .register:
+                    if state.processingState == .failure {
+                        Toast.show(type: .error, message: state.failureMessage ?? "")
+                    }
+                    
+                    if state.processingState == .processing {
+                        LoadingOverlay.show()
+                    }
+                case .error:
+                    break
+                default:
+                    break
+                }
+            })
+            .disposed(by: bag)
+        
+        viewModel.initialize()
+    }
+    
+    @objc private func signupButtonTapped() {
+        Task {
+            await viewModel.signup()
+        }
+    }
+    
     @objc private func loginButtonTapped() {
-        coordinator?.navigateToLogin()
+        coordinator?.popToLogin()
     }
 }

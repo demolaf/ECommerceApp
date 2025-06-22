@@ -39,6 +39,7 @@ class LoginViewController: UIViewController {
         setupPasswordTextField()
         setupLoginButton()
         setupSignupButton()
+        subscribeToViewModel()
     }
     
     private func initializeViewAppearance() {
@@ -91,11 +92,12 @@ class LoginViewController: UIViewController {
             emailTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
         ])
         
+        emailTextField.textEditingState
+            .bind(to: viewModel.emailTextPublisher)
+            .disposed(by: bag)
+        
         emailTextField.formValidState
-            .subscribe(onNext: { [weak self] isValid in
-                guard let self else { return }
-                debugPrint("emailTextField - isValid: \(isValid)")
-            })
+            .bind(to: viewModel.emailValidPublisher)
             .disposed(by: bag)
     }
     
@@ -120,17 +122,20 @@ class LoginViewController: UIViewController {
             passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
         ])
         
+        passwordTextField.textEditingState
+            .bind(to: viewModel.passwordTextPublisher)
+            .disposed(by: bag)
+        
         passwordTextField.formValidState
-            .subscribe(onNext: { [weak self] isValid in
-                guard let self else { return }
-                debugPrint("passwordTextField - isValid: \(isValid)")
-            })
+            .bind(to: viewModel.passwordValidPublisher)
             .disposed(by: bag)
     }
     
     private func setupLoginButton() {
         loginButton = DefaultButton()
+        loginButton.isEnabled = false
         loginButton.button.setTitle("Login", for: .normal)
+        loginButton.button.addTarget(self, action: #selector(loginButtonTapped), for: .primaryActionTriggered)
         loginButton.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(loginButton)
@@ -140,6 +145,14 @@ class LoginViewController: UIViewController {
             loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             loginButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 48),
         ])
+        
+        viewModel.state
+            .distinctUntilChanged(\.formValid)
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                loginButton.isEnabled = state.formValid
+            })
+            .disposed(by: bag)
     }
     
     private func setupSignupButton() {
@@ -165,8 +178,53 @@ class LoginViewController: UIViewController {
         ])
     }
     
+    private func subscribeToViewModel() {
+        viewModel.state
+            .do(onNext: { [weak self] state in
+                guard let self else { return }
+                if state.viewState == .authenticate {
+                    if state.processingState == .success {
+                        coordinator?.navigateToHome()
+                    }
+                }
+            })
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                LoadingOverlay.hide()
+                
+                switch state.viewState {
+                case .loading:
+                    LoadingOverlay.show()
+                case .authenticate:
+                    if state.processingState == .failure {
+                        Toast.show(type: .error, message: state.failureMessage ?? "")
+                    }
+                    
+                    if state.processingState == .processing {
+                        LoadingOverlay.show()
+                    }
+                    
+                    if state.processingState == .success {
+                        Toast.show(type: .success, message: "Authenticated successfully")
+                    }
+                case .error:
+                    break
+                default:
+                    break
+                }
+            })
+            .disposed(by: bag)
+        
+        viewModel.initialize()
+    }
+    
+    @objc private func loginButtonTapped() {
+        Task {
+            await viewModel.login()
+        }
+    }
+    
     @objc private func signupButtonTapped() {
-        debugPrint("signupButtonTapped")
         coordinator?.navigateToSignup()
     }
 }

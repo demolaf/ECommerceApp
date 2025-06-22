@@ -12,10 +12,12 @@
 		7E4FF6532E05C24D006B1074 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4FF6522E05C24D006B1074 /* RxSwift */; };
 		7E4FF6582E05CA26006B1074 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4FF6572E05CA26006B1074 /* RxTest */; };
 		7E4FF65A2E05CA2C006B1074 /* RxBlocking in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4FF6592E05CA2C006B1074 /* RxBlocking */; };
+		7E5DA60A2E0708A3007DBDCF /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4F01FB2E06AFF5006B1074 /* DefaultTextField */; };
+		7E5DA60B2E0708A3007DBDCF /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4F01FE2E06B2F9006B1074 /* DefaultTextField */; };
 		7E792B3E2E00D842008BB2FA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B3D2E00D842008BB2FA /* FirebaseAuth */; };
 		7E792B402E00D842008BB2FA /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B3F2E00D842008BB2FA /* FirebaseCore */; };
 		7E792B422E00D842008BB2FA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B412E00D842008BB2FA /* FirebaseFirestore */; };
-		7EE6912A2E06BE83005B6F26 /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4F01FB2E06AFF5006B1074 /* DefaultTextField */; };
+		7EBC64D12E077EE200D53B32 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 7EBC64D02E077EE200D53B32 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,8 +79,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EE6912A2E06BE83005B6F26 /* DefaultTextField in Frameworks */,
+				7E5DA60B2E0708A3007DBDCF /* DefaultTextField in Frameworks */,
+				7E5DA60A2E0708A3007DBDCF /* DefaultTextField in Frameworks */,
 				7E4FF6512E05C24D006B1074 /* RxRelay in Frameworks */,
+				7EBC64D12E077EE200D53B32 /* Kingfisher in Frameworks */,
 				7E792B402E00D842008BB2FA /* FirebaseCore in Frameworks */,
 				7E4FF64F2E05C24D006B1074 /* RxCocoa in Frameworks */,
 				7E792B3E2E00D842008BB2FA /* FirebaseAuth in Frameworks */,
@@ -162,6 +166,7 @@
 				7E4FF6522E05C24D006B1074 /* RxSwift */,
 				7E4F01FB2E06AFF5006B1074 /* DefaultTextField */,
 				7E4F01FE2E06B2F9006B1074 /* DefaultTextField */,
+				7EBC64D02E077EE200D53B32 /* Kingfisher */,
 			);
 			productName = ECommerceApp;
 			productReference = 7E792B032E00D36D008BB2FA /* ECommerceApp.app */;
@@ -251,6 +256,7 @@
 				7E792B3C2E00D842008BB2FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				7EE6917D2E06BEA8005B6F26 /* XCLocalSwiftPackageReference "../DefaultTextField" */,
+				7EBC64CF2E077EE200D53B32 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7E792B042E00D36D008BB2FA /* Products */;
@@ -340,19 +346,21 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ecommerce.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -371,19 +379,21 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ecommerce.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -654,6 +664,14 @@
 				version = 11.14.0;
 			};
 		};
+		7EBC64CF2E077EE200D53B32 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.3.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -705,6 +723,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7E792B3C2E00D842008BB2FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		7EBC64D02E077EE200D53B32 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7EBC64CF2E077EE200D53B32 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -9,25 +9,40 @@ import UIKit
 
 class AuthCoordinator: Coordinator {
     override func start() {
-        navigateToLogin()
+        let result = DependencyContainer.shared.securityRepository.checkSessionExists()
+        switch result {
+        case .success(let user):
+            if let _ = user {
+                navigateToHome()
+            } else {
+                navigateToLogin()
+            }
+        case .failure:
+            navigateToLogin()
+        }
     }
     
     func navigateToLogin() {
-        let viewModel = LoginViewModel()
+        let viewModel = LoginViewModel(securityRepository: DependencyContainer.shared.securityRepository)
         let vc = LoginViewController(viewModel: viewModel)
         vc.coordinator = self
+        vc.navigationItem.hidesBackButton = true
         router.push(vc)
     }
     
+    func popToLogin() {
+        router.pop(to: LoginViewController.self)
+    }
+    
     func navigateToSignup() {
-        let viewModel = SignupViewModel()
+        let viewModel = SignupViewModel(securityRepository: DependencyContainer.shared.securityRepository)
         let vc = SignupViewController(viewModel: viewModel)
         vc.coordinator = self
         router.push(vc)
     }
-
+    
     func navigateToHome() {
-        let coordinator = MainCoordinator(router: Router(navigationController: UINavigationController()))
+        let coordinator = MainCoordinator(router: router)
         coordinator.parentCoordinator = self
         addChild(coordinator)
         coordinator.start()

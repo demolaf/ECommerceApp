@@ -13,21 +13,30 @@ class MainCoordinator: Coordinator {
     }
     
     func navigateToHome() {
-        let vc = HomeViewController()
+        let viewModel = HomeViewModel(securityRepository: DependencyContainer.shared.securityRepository, productRepository: DependencyContainer.shared.productRepository)
+        let vc = HomeViewController(viewModel: viewModel)
+        vc.navigationItem.hidesBackButton = true
         vc.coordinator = self
         router.push(vc)
     }
     
     func navigateToDetail() {
-        let vc = DetailViewController()
+        let vc = OrdersViewController()
         vc.coordinator = self
         router.push(vc)
     }
     
     func navigateToLogin() {
-        let coordinator = AuthCoordinator(router: Router(navigationController: UINavigationController()))
+        let coordinator = AuthCoordinator(router: router)
         coordinator.parentCoordinator = self
         addChild(coordinator)
-        coordinator.start()
+        coordinator.navigateToLogin()
+    }
+    
+    func navigateToAddProduct() {
+        let viewModel = AddProductViewModel(productRepository: DependencyContainer.shared.productRepository)
+        let vc = AddProductViewController(viewModel: viewModel)
+        vc.coordinator = self
+        router.push(vc)
     }
 }

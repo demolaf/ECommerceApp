@@ -1,5 +1,5 @@
 //
-//  DetailViewModel.swift
+//  OrdersViewModel.swift
 //  ECommerceApp
 //
 //  Created by Ademola Fadumo on 20/06/2025.
@@ -10,7 +10,7 @@ import RxSwift
 import RxRelay
 import RxCocoa
 
-struct DetailState: Equatable {
+struct OrdersState: Equatable {
     enum ViewState: Equatable {
         case initial
         case loading
@@ -26,8 +26,8 @@ struct DetailState: Equatable {
         _ viewState: ViewState,
         processingState: ProcessingState? = nil,
         failureMessage: String? = nil
-    ) -> DetailState {
-        var newState = DetailState()
+    ) -> OrdersState {
+        var newState = OrdersState()
         newState.viewState = viewState
         newState.processingState = processingState ?? self.processingState
         newState.failureMessage = failureMessage ?? self.failureMessage
@@ -35,27 +35,27 @@ struct DetailState: Equatable {
     }
 }
 
-class DetailViewModel {
-    init(state: DetailState = .init()) {
+class OrdersViewModel {
+    init(state: OrdersState = .init()) {
         self._state = .init(value: state)
         
         updateState(state.copyWith(.initial))
     }
     
     
-    private let _state: BehaviorRelay<DetailState>
+    private let _state: BehaviorRelay<OrdersState>
     
-    var state: Driver<DetailState> {
+    var state: Driver<OrdersState> {
         _state
             .distinctUntilChanged()
             .asDriver(onErrorDriveWith: .empty())
     }
     
-    var currentState: DetailState {
+    var currentState: OrdersState {
         _state.value
     }
     
-    private func updateState(_ state: DetailState) {
+    private func updateState(_ state: OrdersState) {
         if currentState == state { return }
         self._state.accept(state)
     }

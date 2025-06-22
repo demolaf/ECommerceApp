@@ -39,9 +39,24 @@ open class Router: NSObject, Routable {
         navigationController.pushViewController(controller, animated: animated)
     }
     
+    @MainActor
+    public func pop(animated: Bool = true, completion: (() -> Void)? = nil) {
+        if let poppedVC = navigationController.popViewController(animated: animated) {
+            runCompletion(for: poppedVC)
+        }
+    }
+    
+    @MainActor
+    public func pop(to vc: UIViewController.Type, animated: Bool = true, completion: (() -> Void)? = nil) {
+        if let existingVC = navigationController.viewControllers.first(where: { type(of: $0) == vc }) {
+            let poppedVCs = navigationController.popToViewController(existingVC, animated: animated)
+            poppedVCs?.forEach { runCompletion(for: $0) }
+        }
+    }
+    
     @MainActor public func popToRoot(animated: Bool) {
-        let poppedControllers = navigationController.popToRootViewController(animated: animated) ?? []
-        poppedControllers.forEach { runCompletion(for: $0) }
+        let poppedVCs = navigationController.popToRootViewController(animated: animated) ?? []
+        poppedVCs.forEach { runCompletion(for: $0) }
     }
 }
 

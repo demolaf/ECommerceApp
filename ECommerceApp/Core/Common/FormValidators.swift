@@ -19,6 +19,26 @@ struct FormValidators {
         }
     )
     
+    static func greaterThanZero(label: String) -> FormValidator {
+        return FormValidator(
+            message: "\(label) must be greater than zero",
+            validate: { input in
+                guard let input else { return false }
+                return (Double(input) ?? 0) > 0
+            }
+        )
+    }
+    
+    static let url = FormValidator(
+        message: "URL is not valid",
+        validate: { input in
+            guard let input else { return false }
+            let pattern = #"^(https?|ftp)://[^\s/$.?#].[^\s]*$"#
+            let predicate = NSPredicate(format: "SELF MATCHES %@", pattern)
+            return predicate.evaluate(with: input)
+        }
+    )
+    
     static func notEmpty(label: String) -> FormValidator {
         return FormValidator(
             message: "\(label) cannot be empty",

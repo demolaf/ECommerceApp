@@ -8,7 +8,7 @@
 import Foundation
 import os
 
-public class DefaultLogger: Sendable {
+nonisolated public class DefaultLogger {
     private init() {}
     private static let subsystem: String = Bundle.main.bundleIdentifier ?? "DefaultLogger"
 
