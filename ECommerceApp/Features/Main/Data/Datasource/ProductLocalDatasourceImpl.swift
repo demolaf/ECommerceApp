@@ -26,7 +26,9 @@ class ProductLocalDatasourceImpl: ProductLocalDatasource {
     }
     
     func getCart() -> Observable<Result<CartDTO, Error>> {
-        guard let getCartObserver else { return Observable.just(.failure(Failure.notFoundInDatabase)) }
+        guard let getCartObserver else {
+            return Observable.just(.failure(Failure.notFoundInDatabase))
+        }
         
         return getCartObserver.asObservable()
             .map { cartList in
@@ -85,6 +87,27 @@ class ProductLocalDatasourceImpl: ProductLocalDatasource {
                 cart.removeFromProducts(existingProduct)
             case .failure(let failure):
                 return .failure(failure)
+            }
+            
+            try moc.save()
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    func clearCart() -> Result<Void, any Error> {
+        do {
+            guard let existingCart = try moc.fetch(CartMO.fetchRequest()).first else {
+                return .failure(Failure.notFoundInDatabase)
+            }
+            
+            guard let products = existingCart.products as? Set<ProductMO> else {
+                return .failure(Failure.notFoundInDatabase)
+            }
+            
+            products.forEach { product in
+                moc.delete(product)
             }
             
             try moc.save()

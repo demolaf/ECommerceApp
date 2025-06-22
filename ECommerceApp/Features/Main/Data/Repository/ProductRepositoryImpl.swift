@@ -50,15 +50,22 @@ class ProductRepositoryImpl: ProductRepository {
         }
     }
     
-    func placeOrder(userId: String, cart: Cart) async -> Result<Void, Error> {
-        await remoteDatasource.placeOrder(
+    func placeOrder(userId: String, cart: Cart) async -> Result<Order, Error> {
+        let result = await remoteDatasource.placeOrder(
             order: OrderDTO(
                 uid: UUID().uuidString,
-                status: "",
+                status: "Processing",
                 userId: userId,
                 products: cart.products.map(ProductDTO.fromEntity),
-                createdAt: .now
+                createdAt: Date.init().toISO8601String()
             ))
+        switch result {
+        case .success(let order):
+            _ = localDatasource.clearCart()
+            return .success(order.toEntity)
+        case .failure(let failure):
+            return .failure(failure)
+        }
     }
     
     func checkIfProductInCart(_ productId: UUID) -> Result<Product, Error> {

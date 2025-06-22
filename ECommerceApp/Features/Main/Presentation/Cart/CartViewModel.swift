@@ -23,6 +23,7 @@ struct CartState: Equatable {
     var processingState: ProcessingState?
     var user: User?
     var cart: Cart?
+    var placedOrder: Order?
     var failureMessage: String?
     
     func copyWith(
@@ -30,6 +31,7 @@ struct CartState: Equatable {
         processingState: ProcessingState? = nil,
         user: User? = nil,
         cart: Cart? = nil,
+        placedOrder: Order? = nil,
         failureMessage: String? = nil
     ) -> CartState {
         var newState = CartState()
@@ -37,6 +39,7 @@ struct CartState: Equatable {
         newState.processingState = processingState ?? self.processingState
         newState.user = user ?? self.user
         newState.cart = cart ?? self.cart
+        newState.placedOrder = placedOrder ?? self.placedOrder
         newState.failureMessage = failureMessage ?? self.failureMessage
         return newState
     }
@@ -113,10 +116,10 @@ class CartViewModel {
         updateState(currentState.copyWith(.placeOrder, processingState: .processing))
         let result = await productRepository.placeOrder(userId: currentState.user?.uid ?? "", cart: cart)
         switch result {
-        case .success(let success):
-            updateState(currentState.copyWith(.placeOrder, processingState: .success))
+        case .success(let order):
+            updateState(currentState.copyWith(.placeOrder, processingState: .success, placedOrder: order))
         case .failure(let failure):
-            updateState(currentState.copyWith(.placeOrder, processingState: .failure))
+            updateState(currentState.copyWith(.placeOrder, processingState: .failure, failureMessage: failure.localizedDescription))
         }
     }
 }

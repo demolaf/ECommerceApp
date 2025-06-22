@@ -15,6 +15,7 @@ struct HomeState: Equatable {
         case initial
         case loading
         case ready
+        case fetchOrders
         case fetchCart
         case addToCart
         case error
@@ -24,6 +25,7 @@ struct HomeState: Equatable {
     var processingState: ProcessingState?
     var products: [Product] = []
     var cart: Cart?
+    var orders: [Order] = []
     var failureMessage: String?
     
     func copyWith(
@@ -31,6 +33,7 @@ struct HomeState: Equatable {
         processingState: ProcessingState? = nil,
         products: [Product]? = nil,
         cart: Cart? = nil,
+        orders: [Order]? = nil,
         failureMessage: String? = nil
     ) -> HomeState {
         var newState = HomeState()
@@ -38,6 +41,7 @@ struct HomeState: Equatable {
         newState.processingState = processingState ?? self.processingState
         newState.products = products ?? self.products
         newState.cart = cart ?? self.cart
+        newState.orders = orders ?? self.orders
         newState.failureMessage = failureMessage ?? self.failureMessage
         return newState
     }
@@ -76,6 +80,7 @@ class HomeViewModel {
     
     func initialize() {
         fetchCart()
+        fetchOrders()
         fetchProducts()
     }
     
@@ -89,6 +94,21 @@ class HomeViewModel {
                     updateState(currentState.copyWith(.fetchCart, processingState: .success, cart: cart))
                 case .failure(let failure):
                     updateState(currentState.copyWith(.fetchCart, processingState: .failure, failureMessage: failure.localizedDescription))
+                }
+            })
+            .disposed(by: bag)
+    }
+    
+    func fetchOrders() {
+        updateState(currentState.copyWith(.fetchOrders, processingState: .processing))
+        productRepository.getOrders()
+            .subscribe(onNext: { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let orders):
+                    updateState(currentState.copyWith(.fetchOrders, processingState: .success, orders: orders))
+                case .failure(let failure):
+                    updateState(currentState.copyWith(.fetchOrders, processingState: .failure, failureMessage: failure.localizedDescription))
                 }
             })
             .disposed(by: bag)

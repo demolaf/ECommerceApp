@@ -13,4 +13,5 @@ protocol ProductLocalDatasource {
     func getCart() -> Observable<Result<CartDTO, Error>>
     func addToCart(_ product: ProductDTO) -> Result<Void, Error>
     func removeFromCart(_ productId: String) -> Result<Void, Error>
+    func clearCart() -> Result<Void, Error>
 }

@@ -96,6 +96,12 @@ class OrdersViewController: UIViewController {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OrdersCollectionViewCell.reuseIdentifier, for: indexPath) as? OrdersCollectionViewCell else {
                     return UICollectionViewCell()
                 }
+                
+                let disclosure = UICellAccessory.outlineDisclosure(
+                    options: .init(style: .header)
+                )
+                cell.accessories = [disclosure]
+                
                 cell.configure(with: order)
                 return cell
             case .item(let product):
@@ -107,46 +113,37 @@ class OrdersViewController: UIViewController {
             }
         }
         
-//        viewModel.state
-//            .debug("initial snapshot setup")
-//            .asObservable()
-//            .single { $0.viewState == .ready }
-//            .subscribe(onNext: {[weak self] state in
-//                guard let self = self else { return }
-//
-//                debugPrint("Should be called only once")
-//                var dataSourceSnapshot = NSDiffableDataSourceSnapshot<Order, ListItem>()
-//                dataSourceSnapshot.appendSections(state.orders)
-//                self.diffableDataSource.apply(dataSourceSnapshot, animatingDifferences: true)
-//
-//                debugPrint("Sections in: \(self.diffableDataSource.numberOfSections(in: collectionView))")
-//            })
-//            .disposed(by: bag)
-        
         viewModel.state
             .distinctUntilChanged(\.orders)
-            .drive(onNext: {[weak self] state in
+            .drive(onNext: { [weak self] state in
                 guard let self else { return }
+                
+                let orders = state.orders
 
-                for order in state.orders {
+                // Step 1: Register all sections (orders)
+                var snapshot = NSDiffableDataSourceSnapshot<Order, ListItem>()
+                snapshot.appendSections(orders)
+                self.diffableDataSource.apply(snapshot, animatingDifferences: true)
+
+                // Step 2: Apply section snapshots for each order
+                for order in orders {
                     var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem>()
 
-                    let headerListItem = ListItem.header(order)
-                    sectionSnapshot.append([headerListItem])
+                    let orderHeaderListItem = ListItem.header(order)
+                    sectionSnapshot.append([orderHeaderListItem])
 
-                    let noteListItemArray = order.products.map { ListItem.item($0) }
-                    sectionSnapshot.append(noteListItemArray, to: headerListItem)
+                    let productsListItem = order.products.map { ListItem.item($0) }
+                    sectionSnapshot.append(productsListItem, to: orderHeaderListItem)
 
-                    // Expand this section by default
-                    sectionSnapshot.expand([headerListItem])
+                    // Optionally expand the section by default
+                    // sectionSnapshot.expand([orderHeaderListItem])
 
-                    // Apply section snapshot to main section
                     self.diffableDataSource.apply(sectionSnapshot, to: order, animatingDifferences: true)
                 }
             })
             .disposed(by: bag)
     }
-
+    
     private func subscribeToViewModel() {
         viewModel.state
             .drive(onNext: { state in

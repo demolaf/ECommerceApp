@@ -46,22 +46,33 @@ class HomeViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = .systemBackground
         
-        navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right"), style: .plain, target: self, action: #selector(logoutButtonTapped)),
-            UIBarButtonItem(image: UIImage(systemName: "list.clipboard"), style: .plain, target: self, action: #selector(ordersButtonTapped))
-        ]
-        
-        setupCartBarButtonItem()
+        setupBarButtonItems()
     }
     
-    private func setupCartBarButtonItem() {
+    private func setupBarButtonItems() {
+        let logoutBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right"), style: .plain, target: self, action: #selector(logoutButtonTapped))
+        
+        let ordersBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "list.clipboard")!, target: self, action: #selector(ordersButtonTapped))
+        
         let cartBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "cart")!, target: self, action: #selector(cartButtonTapped))
-        navigationItem.rightBarButtonItems?.append(cartBarButtonItem)
+        
+        navigationItem.rightBarButtonItems = [
+            logoutBarButtonItem,
+            ordersBarButtonItem,
+            cartBarButtonItem,
+        ]
         
         viewModel.state
             .distinctUntilChanged(\.cart)
             .drive(onNext: { state in
                 cartBarButtonItem.badgeValue = state.cart?.products.count ?? 0
+            })
+            .disposed(by: bag)
+        
+        viewModel.state
+            .distinctUntilChanged(\.orders)
+            .drive(onNext: { state in
+                ordersBarButtonItem.badgeValue = state.orders.count
             })
             .disposed(by: bag)
     }

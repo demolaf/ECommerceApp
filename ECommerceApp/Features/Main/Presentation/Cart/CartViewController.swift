@@ -136,14 +136,35 @@ class CartViewController: UIViewController {
 
     private func subscribeToViewModel() {
         viewModel.state
+            .do(onNext: { [weak self] state in
+                guard let self else { return }
+                if state.viewState == .placeOrder {
+                    if state.processingState == .success {
+                        coordinator?.router.pop()
+                    }
+                }
+            })
             .drive(onNext: { state in
                 LoadingOverlay.hide()
                 
                 switch state.viewState {
                 case .loading:
                     LoadingOverlay.show()
+                case .placeOrder:
+                    if state.processingState == .processing {
+                        LoadingOverlay.show()
+                    }
+                    
+                    if state.processingState == .success {
+                        let id = state.placedOrder?.id.uuidString.prefix(8) ?? ""
+                        Toast.show(type: .success, message: "Order #\(id) placed successfully")
+                    }
+                    
+                    if state.processingState == .failure {
+                        Toast.show(type: .error, message: state.failureMessage ?? "")
+                    }
                 case .error:
-                    break
+                    Toast.show(type: .error, message: state.failureMessage ?? "")
                 default:
                     break
                 }

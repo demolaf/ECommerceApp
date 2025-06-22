@@ -84,7 +84,7 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
         }
     }
     
-    func placeOrder(order: OrderDTO) async -> Result<Void, Error> {
+    func placeOrder(order: OrderDTO) async -> Result<OrderDTO, Error> {
         do {
             let data = try JSONEncoder().encode(order)
             
@@ -95,7 +95,7 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
             let docRef =  firestore.collection("orders").document(order.uid)
             try await docRef.setData(body)
             print("Document added with ID: \(docRef.documentID)")
-            return .success(())
+            return .success(order)
         } catch {
             debugPrint("Error \(error)")
             return .failure(error)
