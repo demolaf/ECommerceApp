@@ -16,8 +16,8 @@ class SecurityRepositoryImpl: SecurityRepository {
     let localDatasource: SecurityLocalDatasource
     let remoteDatasource: SecurityRemoteDatasource
     
-    func checkSessionExists() -> Result<UserDTO?, Error> {
-        localDatasource.fetchUserSession()
+    func checkSessionExists() -> Result<User, Error> {
+        localDatasource.fetchUserSession().map { $0.toEntity }
     }
     
     func signup(email: String, password: String) async -> Result<User, Error> {
@@ -48,6 +48,7 @@ class SecurityRepositoryImpl: SecurityRepository {
     }
     
     func logout() {
+        try? remoteDatasource.logout()
         try? localDatasource.clearUserSession()
     }
 }

@@ -8,5 +8,8 @@
 import Foundation
 
 protocol ProductLocalDatasource {
-    
+    func checkIfProductInCart(_ productId: String) -> Result<ProductDTO, Error>
+    func getCart() -> Result<CartDTO, Error>
+    func addToCart(_ product: ProductDTO) -> Result<Void, Error>
+    func removeFromCart(_ productId: String) -> Result<Void, Error>
 }

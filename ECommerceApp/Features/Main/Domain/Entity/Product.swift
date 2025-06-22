@@ -12,4 +12,5 @@ nonisolated struct Product: Identifiable, Hashable, Equatable {
     let photoUrl: String
     let name: String
     let price: Double
+    var inCart: Bool = false
 }

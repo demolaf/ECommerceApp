@@ -21,7 +21,8 @@ class MainCoordinator: Coordinator {
     }
     
     func navigateToDetail() {
-        let vc = OrdersViewController()
+        let viewModel = OrdersViewModel(productRepository: DependencyContainer.shared.productRepository)
+        let vc = OrdersViewController(viewModel: viewModel)
         vc.coordinator = self
         router.push(vc)
     }
@@ -36,6 +37,20 @@ class MainCoordinator: Coordinator {
     func navigateToAddProduct() {
         let viewModel = AddProductViewModel(productRepository: DependencyContainer.shared.productRepository)
         let vc = AddProductViewController(viewModel: viewModel)
+        vc.coordinator = self
+        router.push(vc)
+    }
+    
+    func navigateToOrders() {
+        let viewModel = OrdersViewModel(productRepository: DependencyContainer.shared.productRepository)
+        let vc = OrdersViewController(viewModel: viewModel)
+        vc.coordinator = self
+        router.push(vc)
+    }
+    
+    func navigateToCart() {
+        let viewModel = CartViewModel(securityRepository: DependencyContainer.shared.securityRepository, productRepository: DependencyContainer.shared.productRepository)
+        let vc = CartViewController(viewModel: viewModel)
         vc.coordinator = self
         router.push(vc)
     }

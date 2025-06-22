@@ -11,16 +11,20 @@ nonisolated struct UserDTO: Codable {
     let uid: String
     let email: String
     let displayName: String
-    
-    func toEntity() -> User {
+
+    var toEntity: User {
         User(uid: uid, email: email, displayName: displayName)
     }
-    
-    static func fromEntity(_ user: User) -> UserDTO {
-        UserDTO(uid: user.uid, email: user.email, displayName: user.displayName)
+
+    static func fromEntity(_ user: User) -> Self {
+        Self(uid: user.uid, email: user.email, displayName: user.displayName)
     }
-    
-    static func fromMO(_ mo: UserMO) -> UserDTO {
-        UserDTO(uid: mo.uid ?? "", email: mo.email ?? "", displayName: mo.displayName ?? "")
+
+    static func fromMO(_ mo: UserMO) -> Self {
+        Self(
+            uid: mo.uid ?? UUID().uuidString,
+            email: mo.email ?? "",
+            displayName: mo.displayName ?? ""
+        )
     }
 }

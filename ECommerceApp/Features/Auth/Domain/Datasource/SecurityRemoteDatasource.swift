@@ -10,4 +10,5 @@ import Foundation
 protocol SecurityRemoteDatasource {
     func signup(email: String, password: String) async -> Result<User, Error>
     func login(email: String, password: String) async -> Result<User, Error>
+    func logout() throws
 }

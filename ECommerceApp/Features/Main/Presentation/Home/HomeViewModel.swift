@@ -15,24 +15,29 @@ struct HomeState: Equatable {
         case initial
         case loading
         case ready
+        case fetchCart
+        case addToCart
         case error
     }
     
     var viewState: ViewState = .initial
     var processingState: ProcessingState?
     var products: [Product] = []
+    var cart: Cart?
     var failureMessage: String?
     
     func copyWith(
         _ viewState: ViewState,
         processingState: ProcessingState? = nil,
         products: [Product]? = nil,
+        cart: Cart? = nil,
         failureMessage: String? = nil
     ) -> HomeState {
         var newState = HomeState()
         newState.viewState = viewState
         newState.processingState = processingState ?? self.processingState
         newState.products = products ?? self.products
+        newState.cart = cart ?? self.cart
         newState.failureMessage = failureMessage ?? self.failureMessage
         return newState
     }
@@ -70,16 +75,52 @@ class HomeViewModel {
     private let bag = DisposeBag()
     
     func initialize() {
+        fetchCart()
         fetchProducts()
     }
     
+    func fetchCart() {
+        updateState(currentState.copyWith(.fetchCart, processingState: .processing))
+        let result = productRepository.getCart()
+        switch result {
+        case .success(let cart):
+            updateState(currentState.copyWith(.fetchCart, processingState: .success, cart: cart))
+        case .failure(let failure):
+            updateState(currentState.copyWith(.fetchCart, processingState: .failure, failureMessage: failure.localizedDescription))
+        }
+    }
+    
     func fetchProducts() {
+        updateState(currentState.copyWith(.loading))
         productRepository.getProducts()
-            .subscribe(onNext: { [weak self] data in
+            .subscribe(onNext: { [weak self] result in
                 guard let self else { return }
-                updateState(currentState.copyWith(.ready, products: data))
+                switch result {
+                case .success(let products):
+                    updateState(currentState.copyWith(.ready, products: products))
+                case .failure(let failure):
+                    updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
+                }
             })
             .disposed(by: bag)
+    }
+    
+    func addToCart(_ product: Product) {
+        updateState(currentState.copyWith(.addToCart, processingState: .processing))
+        
+        let result = switch productRepository.checkIfProductInCart(product.id) {
+        case .success(let product):
+            productRepository.removeFromCart(product.id)
+        case .failure:
+            productRepository.addToCart(product)
+        }
+        
+        switch result {
+        case .success(let success):
+            updateState(currentState.copyWith(.addToCart, processingState: .success))
+        case .failure(let failure):
+            updateState(currentState.copyWith(.addToCart, processingState: .failure, failureMessage: failure.localizedDescription))
+        }
     }
     
     func logout() {

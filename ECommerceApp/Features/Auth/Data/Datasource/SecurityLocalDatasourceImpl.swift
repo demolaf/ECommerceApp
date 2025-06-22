@@ -15,12 +15,13 @@ class SecurityLocalDatasourceImpl: SecurityLocalDatasource {
     
     private let moc: NSManagedObjectContext
     
-    func fetchUserSession() -> Result<UserDTO?, Error> {
+    func fetchUserSession() -> Result<UserDTO, Error> {
         do {
-            if let user = try moc.fetch(UserMO.fetchRequest()).first {
-                return .success(UserDTO.fromMO(user))
+            guard let user = try moc.fetch(UserMO.fetchRequest()).first else {
+                return .failure(Failure.notFoundInDatabase)
             }
-            return .success(nil)
+            
+            return .success(UserDTO.fromMO(user))
         } catch {
             return .failure(error)
         }

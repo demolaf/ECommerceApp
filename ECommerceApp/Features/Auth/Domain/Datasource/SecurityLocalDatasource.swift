@@ -8,7 +8,7 @@
 import Foundation
 
 protocol SecurityLocalDatasource {
-    func fetchUserSession() -> Result<UserDTO?, Error>
+    func fetchUserSession() -> Result<UserDTO, Error>
     @discardableResult func saveUserSession(user: UserDTO) throws -> UserDTO
     func clearUserSession() throws
 }

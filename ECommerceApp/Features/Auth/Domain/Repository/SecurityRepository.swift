@@ -8,7 +8,7 @@
 import Foundation
 
 protocol SecurityRepository {
-    func checkSessionExists() -> Result<UserDTO?, Error>
+    func checkSessionExists() -> Result<User, Error>
     func signup(email: String, password: String) async -> Result<User, Error>
     func login(email: String, password: String) async -> Result<User, Error>
     func logout()

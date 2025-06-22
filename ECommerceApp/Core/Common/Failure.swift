@@ -7,4 +7,6 @@
 
 enum Failure: Error {
     case createDocument
+    case getDocument
+    case notFoundInDatabase
 }

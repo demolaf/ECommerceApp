@@ -77,8 +77,11 @@ class AddProductViewController: UIViewController {
     
     private func setupPhotoImageView() {
         photoImageView = UIImageView()
-        photoImageView.contentMode = .scaleAspectFill
+        photoImageView.kf.indicatorType = .activity
+        photoImageView.image = UIImage(named: "placeholder-image")
         photoImageView.clipsToBounds = true
+        photoImageView.layer.cornerRadius = 8
+        photoImageView.contentMode = .scaleAspectFill
         photoImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(photoImageView)
         
@@ -92,8 +95,8 @@ class AddProductViewController: UIViewController {
         viewModel.photoUrlPublisher
             .subscribe(onNext: { [weak self] urlString in
                 guard let self else { return }
-                if let urlString, let url = URL(string: urlString) {
-                    photoImageView.kf.setImage(with: .network(url))
+                if let urlString, !urlString.isEmpty {
+                    photoImageView.kf.setImage(with: URL(string: urlString), placeholder: UIImage(named: "placeholder-image"))
                 }
             })
             .disposed(by: bag)
@@ -142,7 +145,7 @@ class AddProductViewController: UIViewController {
         NSLayoutConstraint.activate([
             nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            nameTextField.topAnchor.constraint(equalTo: photoUrlTextField.bottomAnchor, constant: 16),
+            nameTextField.topAnchor.constraint(equalTo: photoUrlTextField.bottomAnchor, constant: 8),
         ])
         
         nameTextField.textEditingState
@@ -170,7 +173,7 @@ class AddProductViewController: UIViewController {
         NSLayoutConstraint.activate([
             priceTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             priceTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            priceTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 16),
+            priceTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
             priceTextField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
         
@@ -187,7 +190,7 @@ class AddProductViewController: UIViewController {
     private func setupAddProductButton() {
         addProductButton = DefaultButton()
         addProductButton.isEnabled = false
-        addProductButton.button.setTitle("Add Button", for: .normal)
+        addProductButton.button.setTitle("Add", for: .normal)
         addProductButton.button.addTarget(self, action: #selector(addButtonTapped), for: .primaryActionTriggered)
         addProductButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(addProductButton)
@@ -218,8 +221,7 @@ class AddProductViewController: UIViewController {
                     }
                 }
             })
-            .drive(onNext: { [weak self] state in
-                guard let self else { return }
+            .drive(onNext: { state in
                 LoadingOverlay.hide()
                 
                 switch state.viewState {

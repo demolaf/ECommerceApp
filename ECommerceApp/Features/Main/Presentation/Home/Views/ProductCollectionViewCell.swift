@@ -9,9 +9,10 @@ import UIKit
 import Kingfisher
 
 final class ProductCollectionViewCell: UICollectionViewCell {
-    static let reuseIdentifier = "ProductCell"
+    static let reuseIdentifier = "ProductCollectionViewCell"
     
     private var contentVStack: UIStackView!
+    private var inCartOverlay: UIView!
     private var imageView: UIImageView!
     private var nameLabel: UILabel!
     private var priceLabel: UILabel!
@@ -31,13 +32,14 @@ final class ProductCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        inCartOverlay.isHidden = true
         imageView.image = nil
         nameLabel.text = nil
         priceLabel.text = nil
     }
     
     private func initializeViewAppearance() {
-        contentView.backgroundColor = .secondarySystemGroupedBackground
+        // contentView.backgroundColor = .secondarySystemGroupedBackground
         contentView.layer.cornerRadius = 12
         contentView.clipsToBounds = true
     }
@@ -61,12 +63,41 @@ final class ProductCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupImageView() {
+        inCartOverlay = UIView()
+        inCartOverlay.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        inCartOverlay.isHidden = true
+        inCartOverlay.translatesAutoresizingMaskIntoConstraints = false
+
+        let checkmark = UIImageView()
+        checkmark.image = UIImage(systemName: "checkmark.circle.fill")?.withConfiguration(UIImage.SymbolConfiguration(pointSize: 40, weight: .bold))
+        checkmark.tintColor = .white
+        checkmark.translatesAutoresizingMaskIntoConstraints = false
+
+        inCartOverlay.addSubview(checkmark)
+        
         imageView = UIImageView()
+        imageView.image = UIImage(named: "placeholder-image")
+        imageView.kf.indicatorType = .activity
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
-        imageView.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        imageView.addSubview(inCartOverlay)
+        
         contentVStack.addArrangedSubview(imageView)
+        
+        NSLayoutConstraint.activate([
+            inCartOverlay.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            inCartOverlay.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
+            inCartOverlay.topAnchor.constraint(equalTo: imageView.topAnchor),
+            inCartOverlay.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
+            
+            checkmark.centerXAnchor.constraint(equalTo: inCartOverlay.centerXAnchor),
+            checkmark.centerYAnchor.constraint(equalTo: inCartOverlay.centerYAnchor),
+            
+            imageView.heightAnchor.constraint(equalToConstant: 200),
+        ])
     }
     
     private func setupNameLabel() {
@@ -86,6 +117,7 @@ final class ProductCollectionViewCell: UICollectionViewCell {
     func configure(with product: Product) {
         nameLabel.text = product.name
         priceLabel.text = String(format: "$%.2f", product.price)
-        imageView.kf.setImage(with: URL(string: product.photoUrl))
+        imageView.kf.setImage(with: URL(string: product.photoUrl), placeholder: UIImage(named: "placeholder-image"))
+        inCartOverlay.isHidden = !product.inCart
     }
 }

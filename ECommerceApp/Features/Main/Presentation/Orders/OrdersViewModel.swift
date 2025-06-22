@@ -20,30 +20,34 @@ struct OrdersState: Equatable {
     
     var viewState: ViewState = .initial
     var processingState: ProcessingState?
+    var orders: [Order] = []
     var failureMessage: String?
     
     func copyWith(
         _ viewState: ViewState,
         processingState: ProcessingState? = nil,
+        orders: [Order]? = nil,
         failureMessage: String? = nil
     ) -> OrdersState {
         var newState = OrdersState()
         newState.viewState = viewState
         newState.processingState = processingState ?? self.processingState
+        newState.orders = orders ?? self.orders
         newState.failureMessage = failureMessage ?? self.failureMessage
         return newState
     }
 }
 
 class OrdersViewModel {
-    init(state: OrdersState = .init()) {
+    init(state: OrdersState = .init(), productRepository: ProductRepository) {
         self._state = .init(value: state)
-        
+        self.productRepository = productRepository
         updateState(state.copyWith(.initial))
     }
     
     
     private let _state: BehaviorRelay<OrdersState>
+    private let productRepository: ProductRepository
     
     var state: Driver<OrdersState> {
         _state
@@ -60,5 +64,24 @@ class OrdersViewModel {
         self._state.accept(state)
     }
     
-    func initialize() {}
+    private let bag = DisposeBag()
+    
+    func initialize() {
+        fetchOrders()
+    }
+
+    func fetchOrders() {
+        updateState(currentState.copyWith(.loading))
+        productRepository.getOrders()
+            .subscribe(onNext: { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let orders):
+                    updateState(currentState.copyWith(.ready, orders: orders))
+                case .failure(let failure):
+                    updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
+                }
+            })
+            .disposed(by: bag)
+    }
 }

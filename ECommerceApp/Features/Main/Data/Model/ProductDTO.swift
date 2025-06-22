@@ -12,16 +12,27 @@ nonisolated struct ProductDTO: Codable {
     let photoUrl: String
     let name: String
     let price: Double
-    
-    func toEntity() -> Product {
-        Product(id: UUID(uuidString: uid) ?? .init(), photoUrl: photoUrl, name: name, price: price)
+
+    var toEntity: Product {
+        let id = UUID(uuidString: uid) ?? UUID()
+        return Product(id: id, photoUrl: photoUrl, name: name, price: price)
     }
-    
+
     static func fromEntity(_ product: Product) -> Self {
-        ProductDTO(uid: product.id.uuidString, photoUrl: product.photoUrl, name: product.name, price: product.price)
+        return ProductDTO(
+            uid: product.id.uuidString,
+            photoUrl: product.photoUrl,
+            name: product.name,
+            price: product.price
+        )
     }
-    
+
     static func fromMO(_ mo: ProductMO) -> Self {
-        ProductDTO(uid: mo.uid ?? "", photoUrl: mo.photoUrl ?? "", name: mo.name ?? "", price: mo.price)
+        return ProductDTO(
+            uid: mo.uid ?? UUID().uuidString,
+            photoUrl: mo.photoUrl ?? "",
+            name: mo.name ?? "",
+            price: mo.price
+        )
     }
 }

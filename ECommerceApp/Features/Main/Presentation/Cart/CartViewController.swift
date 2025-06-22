@@ -1,30 +1,30 @@
 //
-//  HomeViewController.swift
+//  CartViewController.swift
 //  ECommerceApp
 //
-//  Created by Ademola Fadumo on 16/06/2025.
+//  Created by Ademola Fadumo on 22/06/2025.
 //
 
 import UIKit
 import RxSwift
 import RxCocoa
 
-class HomeViewController: UIViewController {
+class CartViewController: UIViewController {
     nonisolated enum Section {
         case main
     }
     
-    private var fab: HomeFloatingActionButton!
     private var collectionView: UICollectionView!
+    private var placeOrderButton: DefaultButton!
     
     private var diffableDataSource: UICollectionViewDiffableDataSource<Section, Product>!
     
-    let viewModel: HomeViewModel
+    let viewModel: CartViewModel
     weak var coordinator: MainCoordinator?
     
     let bag = DisposeBag()
     
-    init(viewModel: HomeViewModel) {
+    init(viewModel: CartViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -37,34 +37,16 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         initiailizeViewAppearance()
         setupCollectionView()
-        setupFAB()
+        setupPlaceOrderButton()
         subscribeToViewModel()
     }
     
     private func initiailizeViewAppearance() {
-        title = "Home"
+        title = "Cart"
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = .systemBackground
-        
-        navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right"), style: .plain, target: self, action: #selector(logoutButtonTapped)),
-            UIBarButtonItem(image: UIImage(systemName: "cart"), style: .plain, target: self, action: #selector(cartButtonTapped)),
-            UIBarButtonItem(image: UIImage(systemName: "list.clipboard"), style: .plain, target: self, action: #selector(ordersButtonTapped))
-        ]
     }
-    
-    private func setupFAB() {
-        fab = HomeFloatingActionButton(primaryActionTapped: floatingActionButtonTapped)
-        fab.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(fab)
-        
-        NSLayoutConstraint.activate([
-            fab.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            fab.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
-        ])
-    }
-    
+
     private func setupCollectionView() {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
             // Item
@@ -103,45 +85,51 @@ class HomeViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        diffableDataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) { [viewModel] collectionView, indexPath, product in
+        diffableDataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) { collectionView, indexPath, product in
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: ProductCollectionViewCell.reuseIdentifier,
                 for: indexPath
             ) as? ProductCollectionViewCell else {
                 return UICollectionViewCell()
             }
-            
             cell.configure(with: product)
             return cell
         }
         
-        var previousProducts: [Product] = []
-        
         viewModel.state
-            .distinctUntilChanged(\.products)
+            .distinctUntilChanged(\.cart)
             .drive(onNext: { [weak self] state in
                 guard let self else { return }
-                
-                let currentProducts = state.products
-
-                // Diffing
-                let inserted = currentProducts.filter { !previousProducts.contains($0) }
-                previousProducts = currentProducts
 
                 var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
                 snapshot.appendSections([.main])
-                snapshot.appendItems(currentProducts, toSection: .main)
+                snapshot.appendItems(state.cart?.products ?? [], toSection: .main)
                 diffableDataSource.apply(snapshot, animatingDifferences: true)
-
-                // Scroll to the first inserted item if any
-                if let firstInserted = inserted.first,
-                   let index = currentProducts.firstIndex(of: firstInserted) {
-                    let indexPath = IndexPath(item: index, section: 0)
-                    collectionView.scrollToItem(at: indexPath, at: .centeredVertically, animated: true)
-                }
+            })
+            .disposed(by: bag)
+    }
+    
+    private func setupPlaceOrderButton() {
+        placeOrderButton = DefaultButton()
+        placeOrderButton.button.setTitle("Place Order", for: .normal)
+        placeOrderButton.button.addTarget(self, action: #selector(placeOrderButtonTapped), for: .primaryActionTriggered)
+        placeOrderButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(placeOrderButton)
+        
+        NSLayoutConstraint.activate([
+            placeOrderButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            placeOrderButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            placeOrderButton.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 24),
+            placeOrderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+        ])
+        
+        viewModel.state
+            .distinctUntilChanged(\.cart)
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                placeOrderButton.isEnabled = !(state.cart?.products.isEmpty ?? false)
             })
             .disposed(by: bag)
     }
@@ -164,26 +152,15 @@ class HomeViewController: UIViewController {
         
         viewModel.initialize()
     }
-    
-    @objc private func logoutButtonTapped() {
-        viewModel.logout()
-        coordinator?.navigateToLogin()
-    }
-    
-    @objc private func cartButtonTapped() {
-        coordinator?.navigateToCart()
-    }
-    
-    @objc private func ordersButtonTapped() {
-        coordinator?.navigateToOrders()
-    }
-    
-    private func floatingActionButtonTapped() {
-        coordinator?.navigateToAddProduct()
+
+    @objc private func placeOrderButtonTapped() {
+        Task {
+            await viewModel.placeOrder()
+        }
     }
 }
 
-extension HomeViewController: UICollectionViewDelegate {
+extension CartViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         guard let item = diffableDataSource.itemIdentifier(for: indexPath) else {
@@ -191,6 +168,5 @@ extension HomeViewController: UICollectionViewDelegate {
         }
         
         DefaultLogger.log(self, "Selected item: \(item)")
-        viewModel.addToCart(item)
     }
 }

@@ -18,8 +18,8 @@ class SecurityRemoteDatasourceImpl: SecurityRemoteDatasource {
     func signup(email: String, password: String) async -> Result<User, Error> {
         do {
             let result = try await firebaseAuth.createUser(withEmail: email, password: password)
-            let user = UserDTO(uid: result.user.uid, email: result.user.email ?? "", displayName: result.user.displayName ?? "").toEntity()
-            return .success(user)
+            let user = UserDTO(uid: result.user.uid, email: result.user.email ?? "", displayName: result.user.displayName ?? "")
+            return .success(user.toEntity)
         } catch {
             return .failure(error)
         }
@@ -28,10 +28,14 @@ class SecurityRemoteDatasourceImpl: SecurityRemoteDatasource {
     func login(email: String, password: String) async -> Result<User, Error> {
         do {
             let result = try await firebaseAuth.signIn(withEmail: email, password: password)
-            let user = UserDTO(uid: result.user.uid, email: result.user.email ?? "", displayName: result.user.displayName ?? "").toEntity()
-            return .success(user)
+            let user = UserDTO(uid: result.user.uid, email: result.user.email ?? "", displayName: result.user.displayName ?? "")
+            return .success(user.toEntity)
         } catch {
             return .failure(error)
         }
+    }
+    
+    func logout() throws {
+        try firebaseAuth.signOut()
     }
 }

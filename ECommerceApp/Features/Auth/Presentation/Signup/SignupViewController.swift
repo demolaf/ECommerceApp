@@ -224,8 +224,7 @@ class SignupViewController: UIViewController {
                     }
                 }
             })
-            .drive(onNext: { [weak self] state in
-                guard let self else { return }
+            .drive(onNext: { state in
                 LoadingOverlay.hide()
                 
                 switch state.viewState {

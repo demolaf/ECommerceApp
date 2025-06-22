@@ -46,7 +46,7 @@ class HomeFloatingActionButton: UIView {
     }
     
     private func setupFloatingActionButton() {
-        let height: CGFloat = 56.0
+        let height: CGFloat = 84.0
         floatingActionButton = UIView()
         floatingActionButton.layer.cornerRadius = height / 2
         floatingActionButton.clipsToBounds = true // Important for corner radius masking
@@ -73,7 +73,7 @@ class HomeFloatingActionButton: UIView {
         // Add image icon
         let box = UILabel()
         box.text = "📦"
-        box.font = .systemFont(ofSize: 36)
+        box.font = .systemFont(ofSize: height / 1.5)
         box.translatesAutoresizingMaskIntoConstraints = false
         floatingActionButton.addSubview(box)
         

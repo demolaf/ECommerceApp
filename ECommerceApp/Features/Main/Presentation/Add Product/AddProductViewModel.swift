@@ -126,10 +126,10 @@ class AddProductViewModel {
         let product = Product(id: UUID(), photoUrl: currentState.photoUrl ?? "", name: currentState.name ?? "", price: currentState.price ?? 0)
         let result = await productRepository.storeProduct(product: product)
         switch result {
-        case .success(let success):
+        case .success:
             updateState(currentState.copyWith(.addProduct, processingState: .success))
         case .failure(let failure):
-            updateState(currentState.copyWith(.addProduct, processingState: .failure))
+            updateState(currentState.copyWith(.addProduct, processingState: .failure, failureMessage: failure.localizedDescription))
         }
     }
 }

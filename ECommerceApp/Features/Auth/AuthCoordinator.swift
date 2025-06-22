@@ -11,12 +11,8 @@ class AuthCoordinator: Coordinator {
     override func start() {
         let result = DependencyContainer.shared.securityRepository.checkSessionExists()
         switch result {
-        case .success(let user):
-            if let _ = user {
-                navigateToHome()
-            } else {
-                navigateToLogin()
-            }
+        case .success:
+            navigateToHome()
         case .failure:
             navigateToLogin()
         }
