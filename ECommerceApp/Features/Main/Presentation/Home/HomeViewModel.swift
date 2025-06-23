@@ -23,6 +23,7 @@ struct HomeState: Equatable {
     
     var viewState: ViewState = .initial
     var processingState: ProcessingState?
+    var user: User?
     var products: [Product] = []
     var cart: Cart?
     var orders: [Order] = []
@@ -31,6 +32,7 @@ struct HomeState: Equatable {
     func copyWith(
         _ viewState: ViewState,
         processingState: ProcessingState? = nil,
+        user: User? = nil,
         products: [Product]? = nil,
         cart: Cart? = nil,
         orders: [Order]? = nil,
@@ -39,6 +41,7 @@ struct HomeState: Equatable {
         var newState = HomeState()
         newState.viewState = viewState
         newState.processingState = processingState ?? self.processingState
+        newState.user = user ?? self.user
         newState.products = products ?? self.products
         newState.cart = cart ?? self.cart
         newState.orders = orders ?? self.orders
@@ -79,9 +82,21 @@ class HomeViewModel {
     private let bag = DisposeBag()
     
     func initialize() {
-        fetchCart()
-        fetchOrders()
+        fetchCurrentUser()
         fetchProducts()
+    }
+    
+    func fetchCurrentUser() {
+        updateState(currentState.copyWith(.loading))
+        let result = securityRepository.checkSessionExists()
+        switch result {
+        case .success(let user):
+            updateState(currentState.copyWith(.ready, user: user))
+            fetchCart()
+            fetchOrders()
+        case .failure(let failure):
+            updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
+        }
     }
     
     func fetchCart() {
@@ -101,7 +116,7 @@ class HomeViewModel {
     
     func fetchOrders() {
         updateState(currentState.copyWith(.fetchOrders, processingState: .processing))
-        productRepository.getOrders()
+        productRepository.getOrders(userId: currentState.user?.uid ?? "")
             .subscribe(onNext: { [weak self] result in
                 guard let self else { return }
                 switch result {
@@ -140,7 +155,7 @@ class HomeViewModel {
         }
         
         switch result {
-        case .success(let success):
+        case .success:
             updateState(currentState.copyWith(.addToCart, processingState: .success))
         case .failure(let failure):
             updateState(currentState.copyWith(.addToCart, processingState: .failure, failureMessage: failure.localizedDescription))
@@ -148,6 +163,7 @@ class HomeViewModel {
     }
     
     func logout() {
+        productRepository.clearCart()
         securityRepository.logout()
     }
 }

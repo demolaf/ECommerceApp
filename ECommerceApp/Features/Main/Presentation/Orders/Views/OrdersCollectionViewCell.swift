@@ -148,20 +148,10 @@ class OrdersCollectionViewCell: UICollectionViewListCell {
 
     func configure(with order: Order) {
         titleLabel.text = "Order #\(order.id.uuidString.prefix(8))"
-        statusLabel.text = "Status: \(order.status.capitalized)"
+        statusLabel.text = "\(order.status.title)"
         dateLabel.text = formatted(date: order.createdAt)
         productCountLabel.text = "\(order.products.count) product(s)"
-        // Color code status
-        switch order.status.lowercased() {
-        case "delivered":
-            statusLabel.textColor = Colors.darkGreen
-        case "cancelled":
-            statusLabel.textColor = Colors.darkRed
-        case "pending":
-            statusLabel.textColor = .systemOrange
-        default:
-            statusLabel.textColor = .systemBlue
-        }
+        statusLabel.textColor = order.status.color
     }
 
     private func formatted(date: Date) -> String {

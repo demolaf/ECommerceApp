@@ -22,9 +22,9 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
                 return Disposables.create()
             }
             
-            let listener = firestore.collection("products").addSnapshotListener { snapshots, error in
+            let listener = firestore.collection(FirebaseCollections.products.collectionPath).addSnapshotListener { snapshots, error in
                 guard let snapshots else {
-                    print("Error fetching document: \(String(describing: error))")
+                    DefaultLogger.log(self, "Error fetching document: \(String(describing: error))")
                     if let error {
                         return observer.onNext(.failure(error))
                     }
@@ -49,25 +49,25 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
                 return .failure(Failure.createDocument)
             }
             
-            let docRef =  firestore.collection("products").document(product.uid)
+            let docRef =  firestore.collection(FirebaseCollections.products.collectionPath).document(product.uid)
             try await docRef.setData(body)
-            print("Document added with ID: \(docRef.documentID)")
+            DefaultLogger.log(self, "Document added with ID: \(docRef.documentID)")
             return .success(())
         } catch {
-            debugPrint("Error \(error)")
+            DefaultLogger.log(self, "Error \(error)")
             return .failure(error)
         }
     }
     
-    func getOrders() -> Observable<Result<[OrderDTO], Error>> {
+    func getOrders(userId: String) -> Observable<Result<[OrderDTO], Error>> {
         Observable.create {[weak self] observer in
             guard let self else {
                 return Disposables.create()
             }
             
-            let listener = firestore.collection("orders").addSnapshotListener { snapshots, error in
+            let listener = firestore.collection(FirebaseCollections.orders.collectionPath).whereField("userId", isEqualTo: userId).addSnapshotListener { snapshots, error in
                 guard let snapshots else {
-                    print("Error fetching document: \(String(describing: error))")
+                    DefaultLogger.log(self, "Error fetching document: \(String(describing: error))")
                     if let error {
                         return observer.onNext(.failure(error))
                     }
@@ -92,12 +92,12 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
                 return .failure(Failure.createDocument)
             }
             
-            let docRef =  firestore.collection("orders").document(order.uid)
+            let docRef =  firestore.collection(FirebaseCollections.orders.collectionPath).document(order.uid)
             try await docRef.setData(body)
-            print("Document added with ID: \(docRef.documentID)")
+            DefaultLogger.log(self, "Document added with ID: \(docRef.documentID)")
             return .success(order)
         } catch {
-            debugPrint("Error \(error)")
+            DefaultLogger.log(self, "Error \(error)")
             return .failure(error)
         }
     }

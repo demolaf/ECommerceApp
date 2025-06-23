@@ -8,7 +8,7 @@
 import Foundation
 import os
 
-nonisolated public class DefaultLogger {
+actor DefaultLogger {
     private init() {}
     private static let subsystem: String = Bundle.main.bundleIdentifier ?? "DefaultLogger"
 

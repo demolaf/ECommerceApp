@@ -20,18 +20,21 @@ struct OrdersState: Equatable {
     
     var viewState: ViewState = .initial
     var processingState: ProcessingState?
+    var user: User?
     var orders: [Order] = []
     var failureMessage: String?
     
     func copyWith(
         _ viewState: ViewState,
         processingState: ProcessingState? = nil,
+        user: User? = nil,
         orders: [Order]? = nil,
         failureMessage: String? = nil
     ) -> OrdersState {
         var newState = OrdersState()
         newState.viewState = viewState
         newState.processingState = processingState ?? self.processingState
+        newState.user = user ?? self.user
         newState.orders = orders ?? self.orders
         newState.failureMessage = failureMessage ?? self.failureMessage
         return newState
@@ -39,14 +42,16 @@ struct OrdersState: Equatable {
 }
 
 class OrdersViewModel {
-    init(state: OrdersState = .init(), productRepository: ProductRepository) {
+    init(state: OrdersState = .init(), securityRepository: SecurityRepository, productRepository: ProductRepository) {
         self._state = .init(value: state)
+        self.securityRepository = securityRepository
         self.productRepository = productRepository
         updateState(state.copyWith(.initial))
     }
     
     
     private let _state: BehaviorRelay<OrdersState>
+    private let securityRepository: SecurityRepository
     private let productRepository: ProductRepository
     
     var state: Driver<OrdersState> {
@@ -67,17 +72,28 @@ class OrdersViewModel {
     private let bag = DisposeBag()
     
     func initialize() {
-        fetchOrders()
+        fetchCurrentUser()
+    }
+    
+    func fetchCurrentUser() {
+        updateState(currentState.copyWith(.loading))
+        let result = securityRepository.checkSessionExists()
+        switch result {
+        case .success(let user):
+            updateState(currentState.copyWith(.ready, user: user))
+            fetchOrders()
+        case .failure(let failure):
+            updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
+        }
     }
 
     func fetchOrders() {
         updateState(currentState.copyWith(.loading))
-        productRepository.getOrders()
+        productRepository.getOrders(userId: currentState.user?.uid ?? "")
             .subscribe(onNext: { [weak self] result in
                 guard let self else { return }
                 switch result {
                 case .success(let orders):
-                    DefaultLogger.log(self, "Orders changed: \(orders)")
                     updateState(currentState.copyWith(.ready, orders: orders))
                 case .failure(let failure):
                     updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))

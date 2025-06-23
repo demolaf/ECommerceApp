@@ -16,6 +16,7 @@ class CartViewController: UIViewController {
     
     private var collectionView: UICollectionView!
     private var placeOrderButton: DefaultButton!
+    private var emptyMessageView: EmptyMessageView!
     
     private var diffableDataSource: UICollectionViewDiffableDataSource<Section, Product>!
     
@@ -38,6 +39,7 @@ class CartViewController: UIViewController {
         initiailizeViewAppearance()
         setupCollectionView()
         setupPlaceOrderButton()
+        setupEmptyMessageView()
         subscribeToViewModel()
     }
     
@@ -133,6 +135,20 @@ class CartViewController: UIViewController {
             })
             .disposed(by: bag)
     }
+    
+    private func setupEmptyMessageView() {
+        emptyMessageView = EmptyMessageView(title: "No Items in Cart Yet", subtitle: "Select products and they appear here")
+        emptyMessageView.isHidden = true
+        emptyMessageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyMessageView)
+        
+        NSLayoutConstraint.activate([
+            emptyMessageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyMessageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyMessageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyMessageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
 
     private func subscribeToViewModel() {
         viewModel.state
@@ -144,7 +160,9 @@ class CartViewController: UIViewController {
                     }
                 }
             })
-            .drive(onNext: { state in
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                emptyMessageView.isHidden = true
                 LoadingOverlay.hide()
                 
                 switch state.viewState {
@@ -162,6 +180,10 @@ class CartViewController: UIViewController {
                     
                     if state.processingState == .failure {
                         Toast.show(type: .error, message: state.failureMessage ?? "")
+                    }
+                case .ready:
+                    if state.cart?.products.isEmpty ?? false {
+                        emptyMessageView.isHidden = false
                     }
                 case .error:
                     Toast.show(type: .error, message: state.failureMessage ?? "")

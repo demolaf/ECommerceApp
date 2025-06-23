@@ -20,8 +20,6 @@ class ProductRepositoryImpl: ProductRepository {
     func getProducts() -> Observable<Result<[Product], Error>> {
         Observable.combineLatest(remoteDatasource.getProducts(), localDatasource.getCart())
             .map { productsResult, cartResult in
-                DefaultLogger.log(self, "Got here: \(cartResult)")
-
                 switch (productsResult, cartResult) {
                 case let (.success(products), .success(cart)):
                     let updatedProducts = products.map { product -> Product in
@@ -44,8 +42,8 @@ class ProductRepositoryImpl: ProductRepository {
         await remoteDatasource.storeProduct(product: ProductDTO.fromEntity(product))
     }
     
-    func getOrders() -> Observable<Result<[Order], Error>> {
-        remoteDatasource.getOrders().map { result in
+    func getOrders(userId: String) -> Observable<Result<[Order], Error>> {
+        remoteDatasource.getOrders(userId: userId).map { result in
             result.map { $0.map(\.toEntity) }
         }
     }
@@ -54,7 +52,6 @@ class ProductRepositoryImpl: ProductRepository {
         let result = await remoteDatasource.placeOrder(
             order: OrderDTO(
                 uid: UUID().uuidString,
-                status: "Processing",
                 userId: userId,
                 products: cart.products.map(ProductDTO.fromEntity),
                 createdAt: Date.init().toISO8601String()
@@ -82,5 +79,9 @@ class ProductRepositoryImpl: ProductRepository {
     
     func removeFromCart(_ productId: UUID) -> Result<Void, Error> {
         localDatasource.removeFromCart(productId.uuidString)
+    }
+    
+    func clearCart() -> Result<Void, Error> {
+        localDatasource.clearCart()
     }
 }

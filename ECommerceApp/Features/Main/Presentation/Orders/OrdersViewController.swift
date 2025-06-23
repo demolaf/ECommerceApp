@@ -16,8 +16,8 @@ class OrdersViewController: UIViewController {
     }
     
     private var collectionView: UICollectionView!
-    
     private var diffableDataSource: UICollectionViewDiffableDataSource<Order, ListItem>!
+    private var emptyMessageView: EmptyMessageView!
     
     let viewModel: OrdersViewModel
     weak var coordinator: MainCoordinator?
@@ -37,6 +37,7 @@ class OrdersViewController: UIViewController {
         super.viewDidLoad()
         initiailizeViewAppearance()
         setupCollectionView()
+        setupEmptyMessageView()
         subscribeToViewModel()
     }
     
@@ -144,9 +145,25 @@ class OrdersViewController: UIViewController {
             .disposed(by: bag)
     }
     
+    private func setupEmptyMessageView() {
+        emptyMessageView = EmptyMessageView(title: "No Orders Yet", subtitle: "Place an order and it appears here")
+        emptyMessageView.isHidden = true
+        emptyMessageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyMessageView)
+        
+        NSLayoutConstraint.activate([
+            emptyMessageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyMessageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyMessageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyMessageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
     private func subscribeToViewModel() {
         viewModel.state
-            .drive(onNext: { state in
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                emptyMessageView.isHidden = true
                 LoadingOverlay.hide()
                 
                 switch state.viewState {
@@ -154,6 +171,10 @@ class OrdersViewController: UIViewController {
                     LoadingOverlay.show()
                 case .error:
                     break
+                case .ready:
+                    if state.orders.isEmpty {
+                        emptyMessageView.isHidden = false
+                    }
                 default:
                     break
                 }

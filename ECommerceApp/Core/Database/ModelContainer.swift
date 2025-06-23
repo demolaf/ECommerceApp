@@ -8,11 +8,11 @@
 import CoreData
 import Foundation
 
-actor ModelContainer {
+class ModelContainer {
     init(forInAppPreview: Bool = false) {
         persistentContainer = NSPersistentContainer(name: "ECommerceApp")
 
-        debugPrint(persistentContainer.persistentStoreDescriptions.first!.url!.absoluteString)
+        DefaultLogger.log(self, persistentContainer.persistentStoreDescriptions.first!.url!.absoluteString)
 
         if forInAppPreview {
             // Here is how you set the container’s location to a temporary location where you can insert,

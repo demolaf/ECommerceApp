@@ -16,8 +16,8 @@ class HomeViewController: UIViewController {
     
     private var fab: HomeFloatingActionButton!
     private var collectionView: UICollectionView!
-    
     private var diffableDataSource: UICollectionViewDiffableDataSource<Section, Product>!
+    private var emptyMessageView: EmptyMessageView!
     
     let viewModel: HomeViewModel
     weak var coordinator: MainCoordinator?
@@ -38,6 +38,7 @@ class HomeViewController: UIViewController {
         initiailizeViewAppearance()
         setupCollectionView()
         setupFAB()
+        setupEmptyMessageView()
         subscribeToViewModel()
     }
     
@@ -50,16 +51,19 @@ class HomeViewController: UIViewController {
     }
     
     private func setupBarButtonItems() {
-        let logoutBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right"), style: .plain, target: self, action: #selector(logoutButtonTapped))
+        let logoutBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right")!, target: self, action: #selector(logoutButtonTapped))
         
         let ordersBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "list.clipboard")!, target: self, action: #selector(ordersButtonTapped))
         
         let cartBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "cart")!, target: self, action: #selector(cartButtonTapped))
         
+        let profileBarButtonItem = BadgeBarButtonItem(image: UIImage(systemName: "person.crop.circle")!, target: self, action: #selector(profileButtonTapped))
+        
         navigationItem.rightBarButtonItems = [
             logoutBarButtonItem,
             ordersBarButtonItem,
             cartBarButtonItem,
+            profileBarButtonItem,
         ]
         
         viewModel.state
@@ -137,7 +141,6 @@ class HomeViewController: UIViewController {
             ) as? ProductCollectionViewCell else {
                 return UICollectionViewCell()
             }
-            
             cell.configure(with: product)
             return cell
         }
@@ -169,10 +172,26 @@ class HomeViewController: UIViewController {
             })
             .disposed(by: bag)
     }
+    
+    private func setupEmptyMessageView() {
+        emptyMessageView = EmptyMessageView(title: "No Products Yet", subtitle: "Tap the box icon at the bottom right corner to add a new product")
+        emptyMessageView.isHidden = true
+        emptyMessageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyMessageView)
+        
+        NSLayoutConstraint.activate([
+            emptyMessageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyMessageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyMessageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyMessageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
 
     private func subscribeToViewModel() {
         viewModel.state
-            .drive(onNext: { state in
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                emptyMessageView.isHidden = true
                 LoadingOverlay.hide()
                 
                 switch state.viewState {
@@ -180,6 +199,10 @@ class HomeViewController: UIViewController {
                     LoadingOverlay.show()
                 case .error:
                     break
+                case .ready:
+                    if state.products.isEmpty {
+                        emptyMessageView.isHidden = false
+                    }
                 default:
                     break
                 }
@@ -200,6 +223,13 @@ class HomeViewController: UIViewController {
     
     @objc private func ordersButtonTapped() {
         coordinator?.navigateToOrders()
+    }
+    
+    @objc private func profileButtonTapped() {
+        let email = viewModel.currentState.user?.email ?? "Unknown"
+        let alert = UIAlertController(title: "Profile", message: "Email: \(email)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
     
     private func floatingActionButtonTapped() {
