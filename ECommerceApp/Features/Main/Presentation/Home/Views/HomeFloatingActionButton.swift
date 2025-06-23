@@ -70,16 +70,38 @@ class HomeFloatingActionButton: UIView {
             visualEffect.bottomAnchor.constraint(equalTo: floatingActionButton.bottomAnchor)
         ])
         
-        // Add image icon
+        // Create a container for the emoji and plus icon
+        let iconContainer = UIView()
+        iconContainer.translatesAutoresizingMaskIntoConstraints = false
+        floatingActionButton.addSubview(iconContainer)
+        NSLayoutConstraint.activate([
+            iconContainer.centerXAnchor.constraint(equalTo: floatingActionButton.centerXAnchor),
+            iconContainer.centerYAnchor.constraint(equalTo: floatingActionButton.centerYAnchor),
+            iconContainer.widthAnchor.constraint(equalToConstant: height * 0.7),
+            iconContainer.heightAnchor.constraint(equalToConstant: height * 0.7)
+        ])
+        
+        // Add emoji label
         let box = UILabel()
         box.text = "📦"
         box.font = .systemFont(ofSize: height / 1.5)
         box.translatesAutoresizingMaskIntoConstraints = false
-        floatingActionButton.addSubview(box)
-        
+        iconContainer.addSubview(box)
         NSLayoutConstraint.activate([
-            box.centerXAnchor.constraint(equalTo: floatingActionButton.centerXAnchor),
-            box.centerYAnchor.constraint(equalTo: floatingActionButton.centerYAnchor),
+            box.centerXAnchor.constraint(equalTo: iconContainer.centerXAnchor),
+            box.centerYAnchor.constraint(equalTo: iconContainer.centerYAnchor)
+        ])
+        
+        // Add plus icon in bottom right
+        let plusImageView = UIImageView()
+        let config = UIImage.SymbolConfiguration(pointSize: height / 3, weight: .black)
+        plusImageView.image = UIImage(systemName: "plus", withConfiguration: config)
+        plusImageView.tintColor = .white
+        plusImageView.translatesAutoresizingMaskIntoConstraints = false
+        iconContainer.addSubview(plusImageView)
+        NSLayoutConstraint.activate([
+            plusImageView.trailingAnchor.constraint(equalTo: iconContainer.trailingAnchor, constant: 4),
+            plusImageView.bottomAnchor.constraint(equalTo: iconContainer.bottomAnchor, constant: 2)
         ])
         
         contentVStack.addArrangedSubview(floatingActionButton)
@@ -109,6 +131,17 @@ class HomeFloatingActionButton: UIView {
     }
     
     @objc private func primaryActionButtonTapped() {
-        primaryActionTapped?()
+        // Bounce animation
+        UIView.animate(withDuration: 0.1) { [weak self] in
+            self?.floatingActionButton.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+        } completion: { [weak self] _ in
+            UIView.animate(withDuration: 0.25, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 6, options: .curveEaseInOut) {
+                self?.floatingActionButton.transform = .identity
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.primaryActionTapped?()
+            }
+        }
     }
 }

@@ -18,7 +18,7 @@ nonisolated struct Order: Identifiable, Hashable, Equatable {
         var title: String {
             switch self {
             case .pending: "Pending"
-            case .started: "Started"
+            case .started: "In Progress"
             case .completed: "Completed"
             case .failed: "Failed"
             }
