@@ -148,6 +148,14 @@ class CartViewController: UIViewController {
             emptyMessageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyMessageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+        
+        viewModel.state
+            .distinctUntilChanged(\.cart)
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                emptyMessageView.isHidden = !(state.cart?.products.isEmpty ?? false)
+            })
+            .disposed(by: bag)
     }
 
     private func subscribeToViewModel() {
@@ -160,9 +168,7 @@ class CartViewController: UIViewController {
                     }
                 }
             })
-            .drive(onNext: { [weak self] state in
-                guard let self else { return }
-                emptyMessageView.isHidden = true
+            .drive(onNext: { state in
                 LoadingOverlay.hide()
                 
                 switch state.viewState {
@@ -182,9 +188,7 @@ class CartViewController: UIViewController {
                         Toast.show(type: .error, message: state.failureMessage ?? "")
                     }
                 case .ready:
-                    if state.cart?.products.isEmpty ?? false {
-                        emptyMessageView.isHidden = false
-                    }
+                    break
                 case .error:
                     Toast.show(type: .error, message: state.failureMessage ?? "")
                 default:

@@ -65,7 +65,7 @@ class AddProductViewController: UIViewController {
         NSLayoutConstraint.activate([
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
@@ -107,6 +107,7 @@ class AddProductViewController: UIViewController {
             textFieldComponent: .init(
                 title: "Photo URL",
                 hint: "Enter a valid URL",
+                keyboardType: .URL,
                 validations: [
                     FormValidators.url
                 ]

@@ -13,4 +13,5 @@ protocol ProductRemoteDatasource {
     func storeProduct(product: ProductDTO) async -> Result<Void, Error>
     func getOrders(userId: String) -> Observable<Result<[OrderDTO], Error>>
     func placeOrder(order: OrderDTO) async -> Result<OrderDTO, Error>
+    func cancelOrder(orderId: String) async -> Result<Void, Error>
 }

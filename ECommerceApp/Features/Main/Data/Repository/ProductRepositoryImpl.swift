@@ -28,7 +28,6 @@ class ProductRepositoryImpl: ProductRepository {
                         return updated
                     }
                     return .success(updatedProducts)
-
                 case let (.failure(error), _):
                     return .failure(error)
 
@@ -63,6 +62,10 @@ class ProductRepositoryImpl: ProductRepository {
         case .failure(let failure):
             return .failure(failure)
         }
+    }
+    
+    func cancelOrder(orderId: UUID) async -> Result<Void, Error> {
+        await remoteDatasource.cancelOrder(orderId: orderId.uuidString)
     }
     
     func checkIfProductInCart(_ productId: UUID) -> Result<Product, Error> {

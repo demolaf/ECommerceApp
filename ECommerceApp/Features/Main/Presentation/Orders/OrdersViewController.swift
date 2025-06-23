@@ -49,28 +49,31 @@ class OrdersViewController: UIViewController {
     
     private func setupCollectionView() {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-            // Item
-            let itemSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(250) // Adjust if you want fixed height
-            )
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            
-            // Group
-            let groupSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(250)
-            )
-            let group = NSCollectionLayoutGroup.vertical(
-                layoutSize: groupSize,
-                subitems: [item]
-            )
-            
-            // Section
-            let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
-            section.interGroupSpacing = 12
-            
+            var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+            configuration.headerMode = .none
+            configuration.showsSeparators = false
+            if #available(iOS 15.0, *) {
+                configuration.headerTopPadding = 10
+            }
+            configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
+                let cancelOrderAction = UIContextualAction(
+                    style: .destructive,
+                    title: "Cancel",
+                    handler: { [weak self] _, _, handler in
+                        guard let self else { return }
+                        let order = viewModel.currentState.orders[indexPath.section]
+
+                        Task {
+                            await viewModel.cancelOrder(order, completion:                         handler)
+                        }
+                    })
+                return UISwipeActionsConfiguration(
+                    actions: [
+                        cancelOrderAction
+                    ])
+            }
+            let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
+            section.contentInsets = .init(top: 0, leading: 16, bottom: 0, trailing: 16)
             return section
         }
         
@@ -97,12 +100,8 @@ class OrdersViewController: UIViewController {
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OrdersCollectionViewCell.reuseIdentifier, for: indexPath) as? OrdersCollectionViewCell else {
                     return UICollectionViewCell()
                 }
-                
-                let disclosure = UICellAccessory.outlineDisclosure(
-                    options: .init(style: .header)
-                )
+                let disclosure = UICellAccessory.outlineDisclosure(options: .init(style: .header))
                 cell.accessories = [disclosure]
-                
                 cell.configure(with: order)
                 return cell
             case .item(let product):
@@ -120,25 +119,25 @@ class OrdersViewController: UIViewController {
                 guard let self else { return }
                 
                 let orders = state.orders
-
+                
                 // Step 1: Register all sections (orders)
                 var snapshot = NSDiffableDataSourceSnapshot<Order, ListItem>()
                 snapshot.appendSections(orders)
                 self.diffableDataSource.apply(snapshot, animatingDifferences: true)
-
+                
                 // Step 2: Apply section snapshots for each order
                 for order in orders {
                     var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem>()
-
+                    
                     let orderHeaderListItem = ListItem.header(order)
                     sectionSnapshot.append([orderHeaderListItem])
-
+                    
                     let productsListItem = order.products.map { ListItem.item($0) }
                     sectionSnapshot.append(productsListItem, to: orderHeaderListItem)
-
+                    
                     // Optionally expand the section by default
                     // sectionSnapshot.expand([orderHeaderListItem])
-
+                    
                     self.diffableDataSource.apply(sectionSnapshot, to: order, animatingDifferences: true)
                 }
             })
@@ -157,13 +156,19 @@ class OrdersViewController: UIViewController {
             emptyMessageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyMessageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+        
+        viewModel.state
+            .distinctUntilChanged(\.orders)
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                emptyMessageView.isHidden = !state.orders.isEmpty
+            })
+            .disposed(by: bag)
     }
     
     private func subscribeToViewModel() {
         viewModel.state
-            .drive(onNext: { [weak self] state in
-                guard let self else { return }
-                emptyMessageView.isHidden = true
+            .drive(onNext: { state in
                 LoadingOverlay.hide()
                 
                 switch state.viewState {
@@ -172,9 +177,7 @@ class OrdersViewController: UIViewController {
                 case .error:
                     break
                 case .ready:
-                    if state.orders.isEmpty {
-                        emptyMessageView.isHidden = false
-                    }
+                    break
                 default:
                     break
                 }

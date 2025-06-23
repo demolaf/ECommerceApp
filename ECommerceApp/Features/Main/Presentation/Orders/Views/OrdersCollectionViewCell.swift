@@ -105,8 +105,11 @@ class OrdersCollectionViewCell: UICollectionViewListCell {
         dateIcon.tintColor = .secondaryLabel
         dateIcon.contentMode = .scaleAspectFit
         dateIcon.translatesAutoresizingMaskIntoConstraints = false
-        dateIcon.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        dateIcon.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        
+        NSLayoutConstraint.activate([
+            dateIcon.widthAnchor.constraint(equalToConstant: 16),
+            dateIcon.heightAnchor.constraint(equalToConstant: 16),
+        ])
         
         dateLabel = UILabel()
         dateLabel.font = .systemFont(ofSize: 13)
@@ -122,8 +125,11 @@ class OrdersCollectionViewCell: UICollectionViewListCell {
         productIcon.tintColor = .tertiaryLabel
         productIcon.contentMode = .scaleAspectFit
         productIcon.translatesAutoresizingMaskIntoConstraints = false
-        productIcon.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        productIcon.heightAnchor.constraint(equalToConstant: 16).isActive = true
+
+        NSLayoutConstraint.activate([
+            productIcon.widthAnchor.constraint(equalToConstant: 16),
+            productIcon.heightAnchor.constraint(equalToConstant: 16),
+        ])
         
         productCountLabel = UILabel()
         productCountLabel.font = .systemFont(ofSize: 13)

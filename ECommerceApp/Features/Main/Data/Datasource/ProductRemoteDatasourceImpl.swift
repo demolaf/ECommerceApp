@@ -101,4 +101,15 @@ class ProductRemoteDatasourceImpl: ProductRemoteDatasource {
             return .failure(error)
         }
     }
+    
+    func cancelOrder(orderId: String) async -> Result<Void, Error> {
+        do {
+            let docRef =  firestore.collection(FirebaseCollections.orders.collectionPath).document(orderId)
+            try await docRef.delete()
+            return .success(())
+        } catch {
+            DefaultLogger.log(self, "Error \(error)")
+            return .failure(error)
+        }
+    }
 }

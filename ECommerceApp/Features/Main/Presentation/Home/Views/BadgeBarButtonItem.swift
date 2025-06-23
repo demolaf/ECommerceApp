@@ -43,8 +43,6 @@ class BadgeBarButtonItem: UIBarButtonItem {
         customView = button
         button.setImage(image, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.widthAnchor.constraint(equalToConstant: 32).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 32).isActive = true
 
         button.addSubview(badgeLabel)
 

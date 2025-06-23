@@ -19,7 +19,6 @@ final class ProductCollectionViewCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        initializeViewAppearance()
         setupContentVStack()
         setupImageView()
         setupNameLabel()
@@ -38,12 +37,6 @@ final class ProductCollectionViewCell: UICollectionViewCell {
         priceLabel.text = nil
     }
     
-    private func initializeViewAppearance() {
-        // contentView.backgroundColor = .secondarySystemGroupedBackground
-        contentView.layer.cornerRadius = 12
-        contentView.clipsToBounds = true
-    }
-    
     private func setupContentVStack() {
         contentVStack = UIStackView()
         contentVStack.axis = .vertical
@@ -56,8 +49,8 @@ final class ProductCollectionViewCell: UICollectionViewCell {
         
         NSLayoutConstraint.activate([
             contentVStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            contentVStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            contentVStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
+            contentVStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            contentVStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             contentVStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
         ])
     }

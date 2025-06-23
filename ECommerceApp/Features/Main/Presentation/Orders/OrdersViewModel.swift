@@ -15,6 +15,7 @@ struct OrdersState: Equatable {
         case initial
         case loading
         case ready
+        case cancelOrder
         case error
     }
     
@@ -86,7 +87,7 @@ class OrdersViewModel {
             updateState(currentState.copyWith(.error, failureMessage: failure.localizedDescription))
         }
     }
-
+    
     func fetchOrders() {
         updateState(currentState.copyWith(.loading))
         productRepository.getOrders(userId: currentState.user?.uid ?? "")
@@ -100,5 +101,18 @@ class OrdersViewModel {
                 }
             })
             .disposed(by: bag)
+    }
+    
+    func cancelOrder(_ order: Order, completion: ((Bool) -> Void)? = nil) async {
+        updateState(currentState.copyWith(.cancelOrder, processingState: .processing))
+        let result = await productRepository.cancelOrder(orderId: order.id)
+        switch result {
+        case .success:
+            completion?(true)
+            updateState(currentState.copyWith(.cancelOrder, processingState: .success))
+        case .failure(let failure):
+            completion?(false)
+            updateState(currentState.copyWith(.cancelOrder, processingState: .failure, failureMessage: failure.localizedDescription))
+        }
     }
 }

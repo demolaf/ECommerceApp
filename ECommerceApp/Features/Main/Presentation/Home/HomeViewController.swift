@@ -185,24 +185,28 @@ class HomeViewController: UIViewController {
             emptyMessageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyMessageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+        
+        viewModel.state
+            .distinctUntilChanged(\.products)
+            .drive(onNext: { [weak self] state in
+                guard let self else { return }
+                emptyMessageView.isHidden = !state.products.isEmpty
+            })
+            .disposed(by: bag)
     }
 
     private func subscribeToViewModel() {
         viewModel.state
-            .drive(onNext: { [weak self] state in
-                guard let self else { return }
-                emptyMessageView.isHidden = true
+            .drive(onNext: { state in
                 LoadingOverlay.hide()
-                
+
                 switch state.viewState {
                 case .loading:
                     LoadingOverlay.show()
                 case .error:
                     break
                 case .ready:
-                    if state.products.isEmpty {
-                        emptyMessageView.isHidden = false
-                    }
+                    break
                 default:
                     break
                 }
@@ -227,7 +231,7 @@ class HomeViewController: UIViewController {
     
     @objc private func profileButtonTapped() {
         let email = viewModel.currentState.user?.email ?? "Unknown"
-        let alert = UIAlertController(title: "Profile", message: "Email: \(email)", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Profile", message: email, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
