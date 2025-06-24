@@ -9,4 +9,5 @@ enum Failure: Error {
     case createDocument
     case getDocument
     case notFoundInDatabase
+    case databaseError(String)
 }

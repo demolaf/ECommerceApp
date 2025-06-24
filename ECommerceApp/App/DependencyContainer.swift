@@ -15,13 +15,15 @@ import CoreData
         // Service
         firebaseAuth = Auth.auth()
         firestore = Firestore.firestore()
-        localDatabase = ModelContainer.shared.persistentContainer.viewContext
+        viewMOC = ModelContainer.shared.persistentContainer.viewContext
+        backgroundMOC = ModelContainer.shared.persistentContainer.newBackgroundContext()
+        backgroundMOC.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
         
         // Datasource
-        securityLocalDatasource = SecurityLocalDatasourceImpl(moc: localDatabase)
+        securityLocalDatasource = SecurityLocalDatasourceImpl(moc: viewMOC)
         securityRemoteDatasource = SecurityRemoteDatasourceImpl(firebaseAuth: firebaseAuth)
         
-        productLocalDatasource = ProductLocalDatasourceImpl(moc: localDatabase)
+        productLocalDatasource = ProductLocalDatasourceImpl(moc: viewMOC)
         productRemoteDatasource = ProductRemoteDatasourceImpl(firestore: firestore)
         
         // Repository
@@ -34,7 +36,8 @@ import CoreData
     // MARK: - Services
     private let firebaseAuth: Auth
     private let firestore: Firestore
-    private let localDatabase: NSManagedObjectContext
+    private let viewMOC: NSManagedObjectContext
+    private let backgroundMOC: NSManagedObjectContext
     
     // MARK: - Datasources
     private let securityLocalDatasource: SecurityLocalDatasource

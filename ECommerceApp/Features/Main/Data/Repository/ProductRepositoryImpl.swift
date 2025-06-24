@@ -19,7 +19,7 @@ class ProductRepositoryImpl: ProductRepository {
     
     func getProducts() -> Observable<Result<[Product], Error>> {
         Observable.combineLatest(remoteDatasource.getProducts(), localDatasource.getCart())
-            .map { productsResult, cartResult in
+            .map { [weak self] productsResult, cartResult in
                 switch (productsResult, cartResult) {
                 case let (.success(products), .success(cart)):
                     let updatedProducts = products.map { product -> Product in
@@ -27,6 +27,7 @@ class ProductRepositoryImpl: ProductRepository {
                         updated.inCart = cart.products.contains(where: { $0.uid == product.uid })
                         return updated
                     }
+                    //_ = self?.localDatasource.updateProducts(products)
                     return .success(updatedProducts)
                 case let (.failure(error), _):
                     return .failure(error)
@@ -42,9 +43,16 @@ class ProductRepositoryImpl: ProductRepository {
     }
     
     func getOrders(userId: String) -> Observable<Result<[Order], Error>> {
-        remoteDatasource.getOrders(userId: userId).map { result in
-            result.map { $0.map(\.toEntity) }
-        }
+        remoteDatasource.getOrders(userId: userId)
+            .map { [weak self] result in
+                switch result {
+                case .success(let orders):
+                    //_ = self?.localDatasource.updateOrders(orders)
+                    return .success(orders.map(\.toEntity))
+                case .failure(let failure):
+                    return .failure(failure)
+                }
+            }
     }
     
     func placeOrder(userId: String, cart: Cart) async -> Result<Order, Error> {
@@ -84,7 +92,9 @@ class ProductRepositoryImpl: ProductRepository {
         localDatasource.removeFromCart(productId.uuidString)
     }
     
-    func clearCart() -> Result<Void, Error> {
-        localDatasource.clearCart()
+    func clearCache() {
+        _ = localDatasource.clearCart()
+        _ = localDatasource.clearProducts()
+        _ = localDatasource.clearOrders()
     }
 }

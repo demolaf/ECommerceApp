@@ -163,7 +163,7 @@ class HomeViewModel {
     }
     
     func logout() {
-        productRepository.clearCart()
+        productRepository.clearCache()
         securityRepository.logout()
     }
 }

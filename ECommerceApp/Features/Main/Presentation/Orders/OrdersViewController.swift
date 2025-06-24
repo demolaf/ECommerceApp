@@ -62,7 +62,7 @@ class OrdersViewController: UIViewController {
                     handler: { [weak self] _, _, handler in
                         guard let self else { return }
                         let order = viewModel.currentState.orders[indexPath.section]
-
+                        
                         Task {
                             await viewModel.cancelOrder(order, completion:                         handler)
                         }

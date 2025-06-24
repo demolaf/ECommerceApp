@@ -8,7 +8,7 @@
 import Foundation
 import RxSwift
 
-protocol ProductRepository {
+protocol ProductRepository: AnyObject {
     func getProducts() -> Observable<Result<[Product], Error>>
     func storeProduct(product: Product) async -> Result<Void, Error>
     func getOrders(userId: String) -> Observable<Result<[Order], Error>>
@@ -18,5 +18,5 @@ protocol ProductRepository {
     func getCart() -> Observable<Result<Cart, Error>>
     func addToCart(_ product: Product) -> Result<Void, Error>
     func removeFromCart(_ productId: UUID) -> Result<Void, Error>
-    @discardableResult func clearCart() -> Result<Void, Error>
+    func clearCache()
 }

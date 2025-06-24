@@ -12,14 +12,122 @@ import RxSwift
 class ProductLocalDatasourceImpl: ProductLocalDatasource {
     init(moc: NSManagedObjectContext) {
         self.moc = moc
-        
-        let request = CartMO.fetchRequest()
-        request.sortDescriptors = []
-        getCartObserver = try? FetchedResultsControllerObserver(fetchRequest: request, context: moc)
     }
     
     private let moc: NSManagedObjectContext
-    private var getCartObserver: FetchedResultsControllerObserver<CartMO>?
+    private lazy var getCartObserver: FetchedResultsControllerObserver<CartMO>? = {
+        let request = CartMO.fetchRequest()
+        request.sortDescriptors = []
+        return try? FetchedResultsControllerObserver(fetchRequest: request, context: moc)
+    }()
+    
+//    private lazy var getProductsObserver: FetchedResultsControllerObserver<ProductMO>? = {
+//        let request = ProductMO.fetchRequest()
+//        request.sortDescriptors = []
+//        return try? FetchedResultsControllerObserver(fetchRequest: request, context: moc)
+//    }()
+//    
+//    private lazy var getOrdersObserver: FetchedResultsControllerObserver<OrderMO>? = {
+//        let request = OrderMO.fetchRequest()
+//        request.sortDescriptors = []
+//        return try? FetchedResultsControllerObserver(fetchRequest: request, context: moc)
+//    }()
+    
+    func getProducts() -> Result<[ProductDTO], Error> {
+        do {
+            let products = try moc.fetch(ProductMO.fetchRequest())
+            return .success(products.map(ProductDTO.fromMO))
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    func updateProducts(_ products: [ProductDTO]) -> Result<Void, Error> {
+        do {
+            // Clear existing products first
+            let existingProducts = try moc.fetch(ProductMO.fetchRequest())
+            existingProducts.forEach { moc.delete($0) }
+            
+            // Add new products
+            products.forEach { productDTO in
+                let productMO = ProductMO(context: moc)
+                productMO.name = productDTO.name
+                productMO.photoUrl = productDTO.photoUrl
+                productMO.uid = productDTO.uid
+                productMO.price = productDTO.price
+            }
+            
+            try moc.save()
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    func clearProducts() -> Result<Void, Error> {
+        do {
+            let existingProducts = try moc.fetch(ProductMO.fetchRequest())
+            existingProducts.forEach { moc.delete($0) }
+            
+            try moc.save()
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    func getOrders() -> Result<[OrderDTO], Error> {
+        do {
+            let orders = try moc.fetch(OrderMO.fetchRequest())
+            return .success(orders.map(OrderDTO.fromMO))
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    func updateOrders(_ orders: [OrderDTO]) -> Result<Void, Error> {
+        do {
+            // Clear existing orders first
+            let existingOrders = try moc.fetch(OrderMO.fetchRequest())
+            existingOrders.forEach { moc.delete($0) }
+            
+            // Add new orders
+            orders.forEach { orderDTO in
+                let orderMO = OrderMO(context: moc)
+                orderMO.uid = orderDTO.uid
+                orderMO.userId = orderDTO.userId
+                orderMO.status = orderDTO.status
+                orderMO.createdAt = orderDTO.createdAt.iso8601ToDate()
+                
+                // Add products to order if they exist
+                orderDTO.products.forEach { productDTO in
+                    let productMO = ProductMO(context: moc)
+                    productMO.name = productDTO.name
+                    productMO.photoUrl = productDTO.photoUrl
+                    productMO.uid = productDTO.uid
+                    productMO.price = productDTO.price
+                    orderMO.addToProducts(productMO)
+                }
+            }
+            
+            try moc.save()
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    func clearOrders() -> Result<Void, Error> {
+        do {
+            let existingOrders = try moc.fetch(OrderMO.fetchRequest())
+            existingOrders.forEach { moc.delete($0) }
+            
+            try moc.save()
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
     
     func checkIfProductInCart(_ productId: String) -> Result<ProductDTO, Error> {
         checkIfProductInCartDB(productId).map(ProductDTO.fromMO)
@@ -31,8 +139,8 @@ class ProductLocalDatasourceImpl: ProductLocalDatasource {
         }
         
         return getCartObserver.asObservable()
-            .map { cartList in
-                if let cart = cartList.first {
+            .map { carts in
+                if let cart = carts.first {
                     return .success(CartDTO.fromMO(cart))
                 } else {
                     // Create new CartMO and emit it
