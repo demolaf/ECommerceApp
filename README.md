@@ -50,9 +50,13 @@ A modern iOS e-commerce application built with Swift, UIKit, and a clean archite
   - [Firebase/Auth, Firestore](https://firebase.google.com/docs/ios/setup)
   - [Kingfisher](https://github.com/onevcat/Kingfisher) (for image loading)
 
+### 🚨 Important: GoogleService-Info.plist Placement
+
+You **must** download your `GoogleService-Info.plist` from the Firebase Console and place it in the `ECommerceApp/Supporting Files/` directory. The app will not build or connect to Firebase services without this file in the correct location.
+
 ### Firebase Setup
 1. Create a Firebase project and add an iOS app.
-2. Download `GoogleService-Info.plist` and place it in `ECommerceApp/Supporting Files/`.
+2. Download `GoogleService-Info.plist` and place it in `ECommerceApp/Supporting Files/` (**see above**).
 3. Enable Firestore and Authentication (Email/Password) in the Firebase console.
 
 ### Running the App
