@@ -1,5 +1,5 @@
 {
-  "originHash" : "4824e7d20aa436fff30fb1b43c44595f63d8d301c048fe9905916975eac49d99",
+  "originHash" : "31adeeaa2881e8aea6f15c27210c07da4c7f1e43e64566610d463a73bf2f7a2d",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "61b85103a1aeed8218f17c794687781505fbbef5",
         "version" : "11.2.0"
+      }
+    },
+    {
+      "identity" : "defaulttextfield",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/demolaf/DefaultTextField.git",
+      "state" : {
+        "revision" : "846999e8e2a63399bda4f2ac3341b0b8194d15b8",
+        "version" : "1.0.0"
       }
     },
     {

@@ -12,13 +12,11 @@
 		7E4FF6532E05C24D006B1074 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4FF6522E05C24D006B1074 /* RxSwift */; };
 		7E4FF6582E05CA26006B1074 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4FF6572E05CA26006B1074 /* RxTest */; };
 		7E4FF65A2E05CA2C006B1074 /* RxBlocking in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4FF6592E05CA2C006B1074 /* RxBlocking */; };
+		7E67E61C2E0B2DCF00510989 /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E67E61B2E0B2DCF00510989 /* DefaultTextField */; };
 		7E792B3E2E00D842008BB2FA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B3D2E00D842008BB2FA /* FirebaseAuth */; };
 		7E792B402E00D842008BB2FA /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B3F2E00D842008BB2FA /* FirebaseCore */; };
 		7E792B422E00D842008BB2FA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7E792B412E00D842008BB2FA /* FirebaseFirestore */; };
 		7EBC64D12E077EE200D53B32 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 7EBC64D02E077EE200D53B32 /* Kingfisher */; };
-		7EC0A2872E09E2350066BAE8 /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4F01FB2E06AFF5006B1074 /* DefaultTextField */; };
-		7EC0A2882E09E2350066BAE8 /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E4F01FE2E06B2F9006B1074 /* DefaultTextField */; };
-		7EC0A2892E09E2350066BAE8 /* DefaultTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 7E5FC3742E09A2F4004AD6E3 /* DefaultTextField */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,15 +78,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EC0A2892E09E2350066BAE8 /* DefaultTextField in Frameworks */,
-				7EC0A2882E09E2350066BAE8 /* DefaultTextField in Frameworks */,
-				7EC0A2872E09E2350066BAE8 /* DefaultTextField in Frameworks */,
 				7E4FF6512E05C24D006B1074 /* RxRelay in Frameworks */,
 				7EBC64D12E077EE200D53B32 /* Kingfisher in Frameworks */,
 				7E792B402E00D842008BB2FA /* FirebaseCore in Frameworks */,
 				7E4FF64F2E05C24D006B1074 /* RxCocoa in Frameworks */,
 				7E792B3E2E00D842008BB2FA /* FirebaseAuth in Frameworks */,
 				7E792B422E00D842008BB2FA /* FirebaseFirestore in Frameworks */,
+				7E67E61C2E0B2DCF00510989 /* DefaultTextField in Frameworks */,
 				7E4FF6532E05C24D006B1074 /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -170,6 +166,7 @@
 				7E4F01FE2E06B2F9006B1074 /* DefaultTextField */,
 				7EBC64D02E077EE200D53B32 /* Kingfisher */,
 				7E5FC3742E09A2F4004AD6E3 /* DefaultTextField */,
+				7E67E61B2E0B2DCF00510989 /* DefaultTextField */,
 			);
 			productName = ECommerceApp;
 			productReference = 7E792B032E00D36D008BB2FA /* ECommerceApp.app */;
@@ -259,7 +256,7 @@
 				7E792B3C2E00D842008BB2FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				7EBC64CF2E077EE200D53B32 /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				7E5FC3732E09A2F4004AD6E3 /* XCLocalSwiftPackageReference "../DefaultTextField" */,
+				7E67E61A2E0B2DCF00510989 /* XCRemoteSwiftPackageReference "DefaultTextField" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7E792B042E00D36D008BB2FA /* Products */;
@@ -643,13 +640,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		7E5FC3732E09A2F4004AD6E3 /* XCLocalSwiftPackageReference "../DefaultTextField" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../DefaultTextField;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		7E4FF64B2E05C24D006B1074 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -657,6 +647,14 @@
 			requirement = {
 				kind = exactVersion;
 				version = 6.9.0;
+			};
+		};
+		7E67E61A2E0B2DCF00510989 /* XCRemoteSwiftPackageReference "DefaultTextField" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/demolaf/DefaultTextField.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
 			};
 		};
 		7E792B3C2E00D842008BB2FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -714,6 +712,11 @@
 		};
 		7E5FC3742E09A2F4004AD6E3 /* DefaultTextField */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = DefaultTextField;
+		};
+		7E67E61B2E0B2DCF00510989 /* DefaultTextField */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7E67E61A2E0B2DCF00510989 /* XCRemoteSwiftPackageReference "DefaultTextField" */;
 			productName = DefaultTextField;
 		};
 		7E792B3D2E00D842008BB2FA /* FirebaseAuth */ = {
