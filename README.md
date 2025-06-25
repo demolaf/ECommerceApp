@@ -1,5 +1,7 @@
 # ECommerceApp
 
+https://github.com/user-attachments/assets/0ab08da7-9b05-4184-9573-142e1f8d5b4d
+
 A modern iOS e-commerce application built with Swift, UIKit, and a clean architecture. The app allows users to browse products, add items to a cart, and place orders, with robust offline support and real-time updates.
 
 ## Features
